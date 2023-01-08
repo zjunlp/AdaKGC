@@ -1,0 +1,83 @@
+name: ace05_event
+path: data/oneie/ace05-EN
+data_class: OneIEEvent
+split:
+  train: train.oneie.json
+  val: dev.oneie.json
+  test: test.oneie.json
+language: en
+delete_list: 
+new_list:
+mapper:
+  Business:Declare-Bankruptcy: business
+  Business:End-Org: business
+  Business:Merge-Org: business
+  Business:Start-Org: business
+  Conflict:Attack: attack 
+  Conflict:Demonstrate: demonstrate  
+  Contact:Meet: contact
+  Contact:Phone-Write: contact
+  Justice:Acquit: justice
+  Justice:Appeal: justice
+  Justice:Arrest-Jail: justice
+  Justice:Charge-Indict: justice
+  Justice:Convict: justice 
+  Justice:Execute: execute 
+  Justice:Extradite: extradite
+  Justice:Fine: fine  
+  Justice:Pardon: pardon
+  Justice:Release-Parole: release parole 
+  Justice:Sentence: sentence  
+  Justice:Sue: sue  
+  Justice:Trial-Hearing: justice  
+  Life:Be-Born: be born  
+  Life:Die: die
+  Life:Divorce: life 
+  Life:Injure: life
+  Life:Marry: marry
+  Movement:Transport: transport
+  Personnel:Elect: personnel 
+  Personnel:End-Position: personnel
+  Personnel:Nominate: personnel 
+  Personnel:Start-Position: personnel
+  Transaction:Transfer-Money: transfer money 
+  Transaction:Transfer-Ownership: transfer ownership
+  FAC: facility
+  GPE: geographical social political
+  LOC: location
+  ORG: organization
+  PER: person
+  VEH: vehicle
+  WEA: weapon
+  ORG-AFF: organization affiliation
+  GEN-AFF: general affiliation
+  PHYS: physical
+  PART-WHOLE: part whole
+  PER-SOC: personal social
+  ART: agent artifact
+  Defendant: defendant
+  Prosecutor: prosecutor
+  Person: person
+  Origin: origin
+  Buyer: buyer
+  Plaintiff: plaintiff
+  Victim: victim
+  Org: organization
+  Adjudicator: adjudicator
+  Seller: seller
+  Beneficiary: beneficiary
+  Giver: giver
+  Target: target
+  Agent: agent
+  Instrument: instrument
+  Vehicle: vehicle
+  Entity: entity
+  Destination: destination
+  Recipient: recipient
+  Attacker: attacker
+  Artifact: artifact
+  Place: place
+
+
+
+  

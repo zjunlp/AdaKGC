@@ -1,0 +1,96 @@
+name: Few-NERD
+path: data/Few-NERD
+data_class: NERD
+split:
+  train: train.txt
+  val: dev.txt
+  test: test.txt
+language: en
+new_list:
+ - actor
+ - airport
+ - athlete
+ - building other
+ - disaster
+ - election
+ - hospital
+ - library
+ - person other
+ - politician
+ - protest
+ - restaurant
+ - road
+ - scholar
+ - soldier
+ - sportsfacility
+ - train
+ - writtenart
+delete_list:
+mapper:
+  O: O
+  art-broadcastprogram: art
+  art-film: art
+  art-music: art
+  art-other: art 
+  art-painting: art
+  art-writtenart: writtenart
+  building-airport: airport
+  building-hospital: hospital
+  building-hotel: building
+  building-library: library
+  building-other: building other
+  building-restaurant: restaurant
+  building-sportsfacility: sportsfacility
+  building-theater: theater
+  event-attack/battle/war/militaryconflict: attack
+  event-disaster: disaster
+  event-election: election
+  event-other: event other
+  event-protest: protest
+  event-sportsevent: sportsevent
+  location-GPE: geographical social political
+  location-bodiesofwater: bodiesofwater
+  location-island: location
+  location-mountain: location
+  location-other: location other
+  location-park: park
+  location-road/railway/highway/transit: road
+  organization-company:  organization
+  organization-education: education
+  organization-government/governmentagency:  organization
+  organization-media/newspaper: media
+  organization-other: organization other
+  organization-politicalparty:  organization
+  organization-religion:  organization
+  organization-showorganization:  organization
+  organization-sportsleague:  organization
+  organization-sportsteam:  organization
+  other-astronomything: astronomything
+  other-award: award
+  other-biologything: biologything
+  other-chemicalthing: chemicalthing
+  other-currency: currency
+  other-disease: disease
+  other-educationaldegree: educationaldegree
+  other-god: god
+  other-language: language
+  other-law: law
+  other-livingthing: livingthing
+  other-medical: medical
+  person-actor: actor
+  person-artist/author: person
+  person-athlete: athlete
+  person-director: person
+  person-other: person other
+  person-politician: politician
+  person-scholar: scholar
+  person-soldier: soldier
+  product-airplane: airplane
+  product-car: car
+  product-food: food
+  product-game: game
+  product-other: product other
+  product-ship: ship
+  product-software: product
+  product-train: train
+  product-weapon: weapon

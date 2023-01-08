@@ -1,0 +1,108 @@
+name: Few-NERD
+path: data/Few-NERD
+data_class: NERD
+split:
+  train: train.txt
+  val: dev.txt
+  test: test.txt
+language: en
+new_list:
+ - faith
+ - isle
+ - autocar
+ - chemistry
+ - other part
+ - battle
+ - belief
+ - governmentagency
+ - parliamentary
+ - clinic
+ - gymnasium
+ - aerodrome
+ - program
+ - foodstuff
+ - author
+ - drawing
+ - building othergates
+ - organization else
+ - performer
+ - aircraft
+ - sportsman
+ - song
+ - sports program
+ - newspaper
+ - biologic
+ - academic qualification
+ - hill
+ - lake
+ - product otherness
+ - statesman
+delete_list:
+mapper:
+  O: O
+  art-broadcastprogram: broadcastprogram
+  art-film: film
+  art-music: song
+  art-other: art other
+  art-painting: drawing
+  art-writtenart: writtenart
+  building-airport: aerodrome
+  building-hospital: clinic
+  building-hotel: hotel
+  building-library: library
+  building-other: building othergates
+  building-restaurant: restaurant
+  building-sportsfacility: gymnasium
+  building-theater: theater
+  event-attack/battle/war/militaryconflict: battle
+  event-disaster: disaster
+  event-election: election
+  event-other: event other
+  event-protest: protest
+  event-sportsevent: sports program
+  location-GPE: geographical social political
+  location-bodiesofwater: lake
+  location-island: isle
+  location-mountain: hill
+  location-other: other part
+  location-park: park
+  location-road/railway/highway/transit: road
+  organization-company: company
+  organization-education: education
+  organization-government/governmentagency: governmentagency
+  organization-media/newspaper: newspaper
+  organization-other: organization else
+  organization-politicalparty:  parliamentary
+  organization-religion: faith
+  organization-showorganization: showorganization
+  organization-sportsleague: sportsleague
+  organization-sportsteam: sportsteam
+  other-astronomything: astronomything
+  other-award: award
+  other-biologything: biologic  
+  other-chemicalthing: chemistry
+  other-currency: currency
+  other-disease: disease
+  other-educationaldegree: academic qualification
+  other-god: belief
+  other-language: language
+  other-law: law
+  other-livingthing: livingthing
+  other-medical: medical
+  person-actor: performer
+  person-artist/author: author
+  person-athlete: sportsman
+  person-director: director
+  person-other: person other
+  person-politician: statesman
+  person-scholar: scholar
+  person-soldier: soldier
+  product-airplane: aircraft
+  product-car: autocar
+  product-food: foodstuff
+  product-game: game
+  product-other: product otherness
+  product-ship: ship
+  product-software: program
+  product-train: train
+  product-weapon: weapon

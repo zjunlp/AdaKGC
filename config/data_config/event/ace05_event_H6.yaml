@@ -1,0 +1,97 @@
+name: ace05_event
+path: data/oneie/ace05-EN
+data_class: OneIEEvent
+split:
+  train: train.oneie.json
+  val: dev.oneie.json
+  test: test.oneie.json
+language: en
+new_list:
+ - appeal
+ - charge indict
+ - convict
+ - declare bankruptcy
+ - demonstrate
+ - end position
+ - execute
+ - fine
+ - injure
+ - merge organization
+ - pardon
+ - release parole
+ - start organization
+ - transfer money
+ - trial hearing
+delete_list: 
+ - Contact:Meet 
+ - Life:Divorce 
+ - Personnel:Nominate 
+mapper:
+  Business:Declare-Bankruptcy: declare bankruptcy
+  Business:End-Org: end organization
+  Business:Merge-Org: merge organization
+  Business:Start-Org: start organization
+  Conflict:Attack: attack 
+  Conflict:Demonstrate: demonstrate  
+  Contact:Meet: meet 
+  Contact:Phone-Write: phone write  
+  Justice:Acquit: acquit
+  Justice:Appeal: appeal
+  Justice:Arrest-Jail: arrest jail
+  Justice:Charge-Indict: charge indict
+  Justice:Convict: convict
+  Justice:Execute: execute 
+  Justice:Extradite: extradite
+  Justice:Fine: fine  
+  Justice:Pardon: pardon
+  Justice:Release-Parole: release parole 
+  Justice:Sentence: sentence  
+  Justice:Sue: sue  
+  Justice:Trial-Hearing: trial hearing 
+  Life:Be-Born: be born  
+  Life:Die: die
+  Life:Divorce: divorce
+  Life:Injure: injure
+  Life:Marry: marry
+  Movement:Transport: transport
+  Personnel:Elect: elect
+  Personnel:End-Position: end position
+  Personnel:Nominate: nominate
+  Personnel:Start-Position: start position
+  Transaction:Transfer-Money: transfer money 
+  Transaction:Transfer-Ownership: transfer ownership
+  FAC: facility
+  GPE: geographical social political
+  LOC: location
+  ORG: organization
+  PER: person
+  VEH: vehicle
+  WEA: weapon
+  ORG-AFF: organization affiliation
+  GEN-AFF: general affiliation
+  PHYS: physical
+  PART-WHOLE: part whole
+  PER-SOC: personal social
+  ART: agent artifact
+  Defendant: defendant
+  Prosecutor: prosecutor
+  Person: person
+  Origin: origin
+  Buyer: buyer
+  Plaintiff: plaintiff
+  Victim: victim
+  Org: organization
+  Adjudicator: adjudicator
+  Seller: seller
+  Beneficiary: beneficiary
+  Giver: giver
+  Target: target
+  Agent: agent
+  Instrument: instrument
+  Vehicle: vehicle
+  Entity: entity
+  Destination: destination
+  Recipient: recipient
+  Attacker: attacker
+  Artifact: artifact
+  Place: place

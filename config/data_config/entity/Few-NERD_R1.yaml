@@ -1,0 +1,78 @@
+name: Few-NERD
+path: data/Few-NERD
+data_class: NERD
+split:
+  train: train.txt
+  val: dev.txt
+  test: test.txt
+language: en
+new_list:
+delete_list:
+mapper:
+  O: O
+  art-broadcastprogram: broadcastprogram
+  art-film: film
+  art-music: music
+  art-other: art other
+  art-painting: painting
+  art-writtenart: writtenart
+  building-airport: airport
+  building-hospital: hospital
+  building-hotel: hotel
+  building-library: library
+  building-other: building other
+  building-restaurant: restaurant
+  building-sportsfacility: sportsfacility
+  building-theater: theater
+  event-attack/battle/war/militaryconflict: attack
+  event-disaster: disaster
+  event-election: election
+  event-other: event other
+  event-protest: protest
+  event-sportsevent: sportsevent
+  location-GPE: geographical social political
+  location-bodiesofwater: bodiesofwater
+  location-island: island
+  location-mountain: mountain
+  location-other: location other
+  location-park: park
+  location-road/railway/highway/transit: road
+  organization-company: company
+  organization-education: education
+  organization-government/governmentagency: government
+  organization-media/newspaper: media
+  organization-other: organization other
+  organization-politicalparty:  politicalparty
+  organization-religion:  religion
+  organization-showorganization:  showorganization
+  organization-sportsleague:  sportsleague
+  organization-sportsteam:  sportsteam
+  other-astronomything: astronomything
+  other-award: award
+  other-biologything: biologything
+  other-chemicalthing: chemicalthing
+  other-currency: currency
+  other-disease: disease
+  other-educationaldegree: educationaldegree
+  other-god: god
+  other-language: language
+  other-law: law
+  other-livingthing: livingthing
+  other-medical: medical
+  person-actor: actor
+  person-artist/author: artist
+  person-athlete: athlete
+  person-director: director
+  person-other: person other
+  person-politician: politician
+  person-scholar: scholar
+  person-soldier: soldier
+  product-airplane: airplane
+  product-car: car
+  product-food: food
+  product-game: game
+  product-other: product other
+  product-ship: ship
+  product-software: software
+  product-train: train
+  product-weapon: weapon

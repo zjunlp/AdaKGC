@@ -1,0 +1,52 @@
+name: NYT
+path: data/NYT-multi
+data_class: JointER
+split:
+  train: train.json
+  val: dev.json
+  test: test.json
+language: en
+new_list:
+ - brith place
+ - place lived
+ - neighborhood of
+ - capital
+ - major shareholders
+ - nationality
+ - founders
+ - location
+delete_list:
+ - /people/person/ethnicity
+ - /location/country/administrative_divisions
+ - /business/person/company  
+ - /people/person/religion
+ - /location/administrative_division/country
+ - /people/ethnicity/geographic_distribution 
+mapper:
+  /business/company/advisors: advisors
+  /business/company/founders: founders
+  /business/company/industry: industry
+  /business/company/major_shareholders: major shareholders
+  /business/company/place_founded: place founded
+  /business/company_shareholder/major_shareholder_of: major shareholder of
+  /business/person/company: company
+  /location/administrative_division/country: country
+  /location/country/administrative_divisions: administrative divisions
+  /location/country/capital: capital
+  /location/location/contains: contains
+  /location/neighborhood/neighborhood_of: neighborhood of
+  /people/deceased_person/place_of_death: place of death
+  /people/ethnicity/geographic_distribution: geographic distribution
+  /people/ethnicity/people: people
+  /people/person/children: children
+  /people/person/ethnicity: ethnicity
+  /people/person/nationality: nationality
+  /people/person/place_lived: place lived
+  /people/person/place_of_birth: brith place
+  /people/person/profession: profession
+  /people/person/religion: religion
+  /sports/sports_team/location: location
+  /sports/sports_team_location/teams: teams
+  ORGANIZATION: organization
+  LOCATION: location
+  PERSON: person

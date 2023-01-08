@@ -1,0 +1,25 @@
+# UIE
+/data
+/dataset_processing/data
+/dataset_processing/converted_data
+/dataset_processing/log
+/wandb
+/pretrain_data
+/output
+/output_eval
+/output_infer
+/hf_models
+/pd_models
+/runs
+/models
+*.lock
+
+# mac
+.DS_Store
+
+# env
+/.vscode
+/.idea
+**/__pycache__
+*.pyc
+.pytest_cache

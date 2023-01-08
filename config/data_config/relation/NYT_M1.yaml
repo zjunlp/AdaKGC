@@ -1,0 +1,39 @@
+name: NYT
+path: data/NYT-multi
+data_class: JointER
+split:
+  train: train.json
+  val: dev.json
+  test: test.json
+language: en
+new_list:
+delete_list:
+  - /sports/sports_team_location/teams
+mapper:
+  /business/company/advisors: advisors
+  /business/company/founders: business
+  /business/company/industry: industry
+  /business/company/major_shareholders: business
+  /business/company/place_founded: place founded
+  /business/company_shareholder/major_shareholder_of: major shareholder of
+  /business/person/company: company
+  /location/administrative_division/country: location
+  /location/country/administrative_divisions: location
+  /location/country/capital: location
+  /location/location/contains: contains
+  /location/neighborhood/neighborhood_of: location
+  /people/deceased_person/place_of_death: people
+  /people/ethnicity/geographic_distribution: geographic distribution
+  /people/ethnicity/people: people group
+  /people/person/children: children
+  /people/person/ethnicity: ethnicity
+  /people/person/nationality: people
+  /people/person/place_lived: people
+  /people/person/place_of_birth: people
+  /people/person/profession: profession
+  /people/person/religion: religion
+  /sports/sports_team/location: sports
+  /sports/sports_team_location/teams: teams
+  ORGANIZATION: organization
+  LOCATION: location
+  PERSON: person
