@@ -1,7 +1,6 @@
 # UIE
 /data
 /dataset_processing/data
-/dataset_processing/converted_data
 /dataset_processing/log
 /wandb
 /pretrain_data

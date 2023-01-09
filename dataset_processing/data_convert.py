@@ -82,16 +82,7 @@ def convert_graph(
                         ensure_ascii=False,
                     )
                 )
-    convertor.output_schema(os.path.join(output_folder, "record.schema"))
-    convertor.get_entity_schema(schema_counter["entity"]).write_to_file(
-        os.path.join(output_folder, f"entity.schema")
-    )
-    convertor.get_relation_schema(schema_counter["relation"]).write_to_file(
-        os.path.join(output_folder, f"relation.schema")
-    )
-    convertor.get_event_schema(schema_counter["event"]).write_to_file(
-        os.path.join(output_folder, f"event.schema")
-    )
+    convertor.output_schema(os.path.join(output_folder, "schema.json"))
     logger.info(f"Counter: {dict(counter)}")    
     print(output_folder)
     print("==========================")
@@ -99,79 +90,6 @@ def convert_graph(
 
 
 
-def convert_to_oneie(output_folder: str, datasets: Dict[str, List[Sentence]]):
-    os.makedirs(output_folder, exist_ok=True)
-    counter = Counter()
-
-    for data_type, instance_list in datasets.items():
-        with open(
-            os.path.join(output_folder, f"{data_type}.oneie.json"), "w"
-        ) as output:
-            for instance in tqdm(instance_list):
-                counter.update([f"{data_type} sent"])
-                entity_mentions = [
-                    {
-                        "id": entity.record_id,
-                        "entity_type": str(entity.label),
-                        "text": entity.span.text,
-                        "start": entity.span.indexes[0],
-                        "end": entity.span.indexes[-1] + 1,
-                    }
-                    for entity in instance.entities
-                ]
-                relation_mentions = [
-                    {
-                        "id": relation.record_id,
-                        "relation_type": str(relation.label),
-                        "argument": [
-                            {
-                                "entity_id": relation.arg1.record_id,
-                                "text": relation.arg1.span.text,
-                                "role": "Arg-1",
-                            },
-                            {
-                                "entity_id": relation.arg2.record_id,
-                                "text": relation.arg2.span.text,
-                                "role": "Arg-2",
-                            },
-                        ],
-                    }
-                    for relation in instance.relations
-                ]
-                event_mentions = [
-                    {
-                        "id": event.record_id,
-                        "event_type": str(event.label),
-                        "trigger": {
-                            "text": event.span.text,
-                            "start": event.span.indexes[0],
-                            "end": event.span.indexes[-1] + 1,
-                        },
-                        "argument": [
-                            {
-                                "id": arg[1].record_id,
-                                "text": arg[1].span.text,
-                                "role": str(arg[0]),
-                            }
-                            for arg in event.args
-                        ],
-                    }
-                    for event in instance.events
-                ]
-
-                instance_dict = {
-                    "tokens": instance.tokens,
-                    "sent_id": instance.text_id,
-                    "entity_mentions": entity_mentions,
-                    "relation_mentions": relation_mentions,
-                    "event_mentions": event_mentions,
-                }
-                instance_str = json.dumps(instance_dict, ensure_ascii=False)
-                output.write(f"{instance_str}\n")
-
-    print(counter)    
-    print(output_folder)
-    print("==========================")
 
 
 def main():
@@ -193,18 +111,16 @@ def main():
         dataset = Dataset.load_yaml_file(filename)
         datasets = dataset.load_dataset(logger_name=f"{options.task}_{options.mode}")    
         label_mapper = dataset.mapper
-        output_name = f"converted_data/iter_{it}/{options.task}_{options.mode}"  
+        output_name = f"../data/iter_{it}/{options.task}_{options.mode}"  
 
-        if generation_class:
-            convert_graph(
-                generation_class,
-                output_name,
-                datasets=datasets,
-                language=dataset.language,
-                label_mapper=label_mapper,
-            )
-        elif options.generation_format == "oneie":
-            convert_to_oneie(output_name, datasets=datasets)
+        convert_graph(
+            generation_class,
+            output_name,
+            datasets=datasets,
+            language=dataset.language,
+            label_mapper=label_mapper,
+        )
+
 
 
 if __name__ == "__main__":
