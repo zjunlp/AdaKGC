@@ -219,9 +219,10 @@ then
   output_name=${output_name}_task
 fi
 echo ${output_name}
+export output_name
 
 
-CUDA_VISIBLE_DEVICES=${CUDA_VISIBLE_DEVICES} python3 run_prompt.py \
+CUDA_VISIBLE_DEVICES=${CUDA_VISIBLE_DEVICES} python3 run.py \
     --do_train --do_eval --do_predict ${constraint_decoding} ${fp16} \
     --use_fast_tokenizer=True \
     --from_checkpoint=True \
@@ -239,7 +240,7 @@ CUDA_VISIBLE_DEVICES=${CUDA_VISIBLE_DEVICES} python3 run_prompt.py \
     --train_file=${data_name}/train.json \
     --validation_file=${data_name}/val.json \
     --test_file=${data_name}/test.json \
-    --record_schema=${data_name}/record.schema \
+    --record_schema=${data_name}/schema.json \
     --per_device_train_batch_size=${batch_size} \
     --per_device_eval_batch_size=$((batch_size * 4)) \
     --output_dir=${output_name} \

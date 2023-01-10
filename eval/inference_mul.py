@@ -238,11 +238,10 @@ def main():
         logger.info(f"data: {data}")
 
 
-        predictor.load_schema(f"{data}/record.schema", options.CD)  
+        predictor.load_schema(f"{data}/schema.json", options.CD)  
         schema_dict = SEL2Record.load_schema_dict(data)
         sel2record = SEL2Record(
             schema_dict=schema_dict,
-            decoding_schema=options.decoding,
             map_config=map_config,
         )
 

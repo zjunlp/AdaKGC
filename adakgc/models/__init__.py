@@ -1,4 +1,4 @@
-from models.spotasoc_constraint_decoder import SpotConstraintDecoder, SpotAsocConstraintDecoder
+from adakgc.models.spotasoc_constraint_decoder import SpotConstraintDecoder, SpotAsocConstraintDecoder
 
 def get_constraint_decoder(tokenizer, record_schema, decoding_schema, task_name='event'):
     if decoding_schema == 'spotasoc':

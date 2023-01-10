@@ -228,12 +228,11 @@ def main():
 
 
     predictor = HuggingfacePromptPredictor(args=options) 
-    predictor.load_schema(f"{options.data}/record.schema", options.CD)  
+    predictor.load_schema(f"{options.data}/schema.json", options.CD)  
     map_config = MapConfig.load_from_yaml(options.map_config)
     schema_dict = SEL2Record.load_schema_dict(options.data_folder)
     sel2record = SEL2Record(
         schema_dict=schema_dict,
-        decoding_schema=options.decoding,
         map_config=map_config,
     )
 

@@ -1,6 +1,6 @@
 import torch
 from torch import nn
-from models.modeling_t5 import T5ForConditionalGeneration
+from adakgc.models.modeling_t5 import T5ForConditionalGeneration
 import logging
 logger = logging.getLogger("__main__")
 

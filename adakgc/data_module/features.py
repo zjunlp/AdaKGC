@@ -24,7 +24,6 @@ DatasetFeature = Features({
     'spot_asoc': [{'span': Value(dtype='string', id=None),
                    'label': Value(dtype='string', id=None),
                    'asoc': Sequence(feature=Sequence(feature=Value(dtype='string', id=None), length=-1, id=None), length=-1, id=None)}],
-    'task': Value(dtype='string', id=None),
 })
 
 
@@ -39,7 +38,6 @@ _processed_feature = {
          'label': Value(dtype='string', id=None),
          'asoc': Sequence(feature=Sequence(feature=Value(dtype='string', id=None), length=-1, id=None), length=-1, id=None)}
     ],
-    'task': Value(dtype='string', id=None),
     'sample_prompt': Value(dtype='bool', id=None)
 }
 

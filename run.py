@@ -441,8 +441,6 @@ def main():
             pred_lns=decoded_preds,
             tgt_lns=decoded_labels,
             label_constraint=record_schema,
-            decoding_format=data_args.decoding_format,
-            tokenizer=tokenizer,
         )
 
         prediction_lens = [np.count_nonzero(pred != tokenizer.pad_token_id) for pred in preds]

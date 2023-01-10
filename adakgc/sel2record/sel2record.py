@@ -3,7 +3,7 @@
 from collections import defaultdict, OrderedDict
 import os
 from adakgc.utils.record_schema import RecordSchema
-from adakgc.extraction.predict_parser import get_predict_parser
+from adakgc.extraction.predict_parser import SpotAsocPredictParser
 from adakgc.sel2record.record import EntityRecord, MapConfig, RelationRecord, EventRecord
 import logging
 
@@ -78,10 +78,9 @@ def proprocessing_graph_record(graph, schema_dict):
 
 
 class SEL2Record:
-    def __init__(self, schema_dict, decoding_schema, map_config: MapConfig) -> None:
+    def __init__(self, schema_dict, map_config: MapConfig) -> None:
         self._schema_dict = schema_dict
-        self._predict_parser = get_predict_parser(
-            decoding_schema=decoding_schema,
+        self._predict_parser = SpotAsocPredictParser(
             label_constraint=schema_dict['record'],
         )
         self._map_config = map_config

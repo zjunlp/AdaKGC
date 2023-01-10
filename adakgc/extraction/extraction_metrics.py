@@ -38,8 +38,8 @@ def eval_pred(predict_parser: SpotAsocPredictParser, gold_list, pred_list, text_
     return result
 
 
-def get_extract_metrics(pred_lns: List[str], tgt_lns: List[str], label_constraint: RecordSchema, decoding_format='tree'):
-    predict_parser = SpotAsocPredictParser(decoding_schema=decoding_format, label_constraint=label_constraint)
+def get_extract_metrics(pred_lns: List[str], tgt_lns: List[str], label_constraint: RecordSchema):
+    predict_parser = SpotAsocPredictParser(label_constraint=label_constraint)
     return eval_pred(
         predict_parser=predict_parser,
         gold_list=tgt_lns,
