@@ -54,6 +54,5 @@ class GenerationFormat:
 
         record_schema = RecordSchema(type_list=record_list,
                                      role_list=role_list,
-                                     type_role_dict=self.record_role_map
-                                     )
+                                     type_role_dict=self.record_role_map)
         record_schema.write_to_file(filename)

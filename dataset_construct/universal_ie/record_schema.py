@@ -25,3 +25,20 @@ class RecordSchema:
             output.write(json.dumps(self.role_list, ensure_ascii=False) + '\n')
             output.write(json.dumps(self.type_role_dict, ensure_ascii=False) + '\n')
 
+    @staticmethod
+    def output_schema(record_role_map, filename: str):
+        """导出 Schema 文件
+        Args:
+            filename (str): [description]
+        """
+        record_list = list(record_role_map.keys())
+        role_set = set()
+        for record in record_role_map:
+            role_set.update(record_role_map[record])
+            record_role_map[record] = list(record_role_map[record])
+        role_list = list(role_set)
+
+        record_schema = RecordSchema(type_list=record_list,
+                                    role_list=role_list,
+                                    type_role_dict=record_role_map)
+        record_schema.write_to_file(filename)

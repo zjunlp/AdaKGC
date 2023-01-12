@@ -34,10 +34,11 @@ from adakgc.data_module.data_collator import (
     RelationPromptSSIGenerator
 )
 from adakgc.models.models import T5Prompt, EMA 
+from dataset_construct.universal_ie.generation_format import generation_format_dict
+from dataset_construct.universal_ie.generation_format.structure_marker import BaseStructureMarker
 
-
-#os.environ["CUDA_DEVICE_ORDER"]="PCI_BUS_ID"
-#os.environ["CUDA_VISIBLE_DEVICES"]='1'
+os.environ["CUDA_DEVICE_ORDER"]="PCI_BUS_ID"
+os.environ["CUDA_VISIBLE_DEVICES"]='1'
 os.environ["WANDB_DISABLED"] = "true"
 os.environ["HF_DATASETS_CACHE"] = "/newdisk2/guihh/.cache/huggingface/datasets"
 logger = logging.getLogger("__main__")
@@ -86,7 +87,6 @@ def main():
         model_args, data_args, training_args, prompt_args = parser.parse_json_file(json_file=os.path.abspath(sys.argv[1]))
     else:
         model_args, data_args, training_args, prompt_args = parser.parse_args_into_dataclasses()
-
 
     # Setup logging
     log_name = training_args.output_dir.split('/')[-1]
@@ -282,12 +282,21 @@ def main():
             f"`{model.__class__.__name__}`. This will lead to loss being calculated twice and will take up more memory"
         )
 
+    generation_class = generation_format_dict.get('spotasoc')  
 
-
+    convertor = generation_class(
+        structure_maker=BaseStructureMarker(),
+    )
 
     def preprocess_function(examples):
+        converted_graph = convertor.annonote_graph(
+            tokens=examples["tokens"],
+            entities=examples["entity"],
+            relations=examples["relation"],
+            events=examples["event"],
+        )
         inputs = examples[text_column]
-        targets = examples[record_column]
+        targets = converted_graph[1]
         inputs = [inp for inp in inputs]
         model_inputs = tokenizer(inputs, max_length=data_args.max_source_length, padding=padding, truncation=True)
 
@@ -305,9 +314,9 @@ def main():
         model_inputs["labels"] = labels["input_ids"]
 
         model_inputs['sample_prompt'] = [False] * len(model_inputs['input_ids'])
-        model_inputs['spots'] = examples['spot']
-        model_inputs['asocs'] = examples['asoc']
-        model_inputs['spot_asoc'] = examples['spot_asoc']
+        model_inputs['spots'] = list(converted_graph[2])
+        model_inputs['asocs'] = list(converted_graph[3])
+        model_inputs['spot_asoc'] = converted_graph[4]
         # sample_prompt=True for Finetune and Pretrain
         model_inputs['sample_prompt'] = [True] * len(model_inputs['input_ids'])
         return model_inputs

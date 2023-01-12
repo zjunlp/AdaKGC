@@ -26,6 +26,7 @@ class JointER(TaskFormat):
         self.spo_details = sentence_json['spo_details']
         self.pos_tags = sentence_json['pos_tags']
 
+
     def generate_instance(self, delete_list):
         entities = dict()
         relations = dict()
