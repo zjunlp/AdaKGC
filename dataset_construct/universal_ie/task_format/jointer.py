@@ -1,12 +1,14 @@
 #!/usr/bin/env python
 # -*- coding:utf-8 -*-
 import json
-from typing import Counter, List, Mapping
 import logging
+from typing import Counter, List, Mapping
 
+
+from universal_ie.task_format.task_format import TaskFormat
 from universal_ie.utils import tokens_to_str, change_ptb_token_back
 from universal_ie.ie_format import Entity, Label, Relation, Sentence, Span
-from universal_ie.task_format.task_format import TaskFormat
+
 
 
 class JointER(TaskFormat):

@@ -3,8 +3,9 @@
 import json
 from typing import Counter, List
 import logging
-from universal_ie.task_format.task_format import TaskFormat
+
 from universal_ie.utils import tokens_to_str
+from universal_ie.task_format.task_format import TaskFormat
 from universal_ie.ie_format import Entity, Event, Label, Sentence, Span
 
 

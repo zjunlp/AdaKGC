@@ -1,9 +1,10 @@
 #!/usr/bin/env python
 # -*- coding:utf-8 -*-
-from universal_ie.utils import label_format
 import yaml
 import os
 from typing import Dict, List
+
+from universal_ie.utils import label_format
 import universal_ie.task_format as task_format
 
 

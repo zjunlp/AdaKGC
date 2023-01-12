@@ -168,7 +168,7 @@ class PromptSSIGenerator():
 
 class RelationPromptSSIGenerator(PromptSSIGenerator):
     def __init__(self, tokenizer, schema: RecordSchema, negative_list=[], positive_rate=1, spot_negative=5, asoc_negative=5, ordered_prompt=False, other_ratio = 0.3) -> None:
-        super.__init__(tokenizer, schema, negative_list, positive_rate, spot_negative, asoc_negative, ordered_prompt, other_ratio)
+        super().__init__(tokenizer, schema, negative_list, positive_rate, spot_negative, asoc_negative, ordered_prompt, other_ratio)
 
 
     def sample_spot(self, positive):

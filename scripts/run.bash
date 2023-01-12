@@ -1,6 +1,6 @@
 mode=R
-dataset_name=NYT
-task=relation
+dataset_name=ace05_event
+task=event
 device=2
 ratio=0.8
 . config/prompt_conf/${dataset_name}.ini 

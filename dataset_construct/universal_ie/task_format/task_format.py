@@ -1,8 +1,6 @@
 #!/usr/bin/env python
 # -*- coding:utf-8 -*-
 import abc
-
-
 class TaskFormat:
     __metaclass__ = abc.ABCMeta
 

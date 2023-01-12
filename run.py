@@ -33,9 +33,9 @@ from adakgc.data_module.data_collator import (
     PromptSSIGenerator,
     RelationPromptSSIGenerator
 )
+from adakgc.data_module.text2spotasoc import text2spotasoc
 from adakgc.models.models import T5Prompt, EMA 
-from dataset_construct.universal_ie.generation_format import generation_format_dict
-from dataset_construct.universal_ie.generation_format.structure_marker import BaseStructureMarker
+
 
 os.environ["CUDA_DEVICE_ORDER"]="PCI_BUS_ID"
 os.environ["CUDA_VISIBLE_DEVICES"]='1'
@@ -282,21 +282,18 @@ def main():
             f"`{model.__class__.__name__}`. This will lead to loss being calculated twice and will take up more memory"
         )
 
-    generation_class = generation_format_dict.get('spotasoc')  
-
-    convertor = generation_class(
-        structure_maker=BaseStructureMarker(),
-    )
 
     def preprocess_function(examples):
-        converted_graph = convertor.annonote_graph(
-            tokens=examples["tokens"],
-            entities=examples["entity"],
-            relations=examples["relation"],
-            events=examples["event"],
-        )
+        graphs = {"target": list(), "spots": list(), "asocs": list(), "spot_asoc": list()}
+        for entity, relation, event in zip(examples["entity"], examples["relation"], examples["event"]):
+            graph = text2spotasoc(entity, relation, event)
+            graphs["target"].append(graph[0])
+            graphs["spots"].append(graph[1])
+            graphs["asocs"].append(graph[2])
+            graphs["spot_asoc"].append(graph[3])
+
         inputs = examples[text_column]
-        targets = converted_graph[1]
+        targets = graphs["target"]
         inputs = [inp for inp in inputs]
         model_inputs = tokenizer(inputs, max_length=data_args.max_source_length, padding=padding, truncation=True)
 
@@ -312,17 +309,16 @@ def main():
             ]
 
         model_inputs["labels"] = labels["input_ids"]
-
         model_inputs['sample_prompt'] = [False] * len(model_inputs['input_ids'])
-        model_inputs['spots'] = list(converted_graph[2])
-        model_inputs['asocs'] = list(converted_graph[3])
-        model_inputs['spot_asoc'] = converted_graph[4]
+        model_inputs['spots'] = graphs["spots"]
+        model_inputs['asocs'] = graphs["asocs"]
+        model_inputs['spot_asoc'] = graphs["spot_asoc"]
         # sample_prompt=True for Finetune and Pretrain
         model_inputs['sample_prompt'] = [True] * len(model_inputs['input_ids'])
         return model_inputs
 
-    def preprocess_function_eval(examples):
-        model_inputs = preprocess_function(examples)
+    def preprocess_function_eval(example):
+        model_inputs = preprocess_function(example)
         # sample_prompt=False for evaluation
         model_inputs['sample_prompt'] = [False] * len(model_inputs['input_ids'])
         return model_inputs
@@ -332,7 +328,6 @@ def main():
         for to_remove_token in to_remove_token_list:
             x_str = x_str.replace(to_remove_token, '')
         return x_str.strip()
-
 
 
 

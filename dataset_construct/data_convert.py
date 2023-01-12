@@ -5,7 +5,6 @@ import json
 from typing import Dict, List
 from tqdm import tqdm
 from collections import Counter
-from universal_ie.generation_format import generation_format_dict
 from universal_ie.record_schema import RecordSchema
 from universal_ie.dataset import Dataset
 from universal_ie.ie_format import Sentence
@@ -94,7 +93,6 @@ def main():
     parser.add_argument("--mode", dest="mode", default="V")
     options = parser.parse_args()
 
-    generation_class = generation_format_dict.get('spotasoc')  
     global logger
     logger = init_logger(task_name = f"{options.task}_{options.mode}")
 

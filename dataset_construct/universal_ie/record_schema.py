@@ -1,9 +1,6 @@
 #!/usr/bin/env python
 # -*- coding:utf-8 -*-
 import json
-from collections import defaultdict
-from typing import List
-
 
 class RecordSchema:
     def __init__(self, type_list, role_list, type_role_dict):
