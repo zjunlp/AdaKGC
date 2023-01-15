@@ -265,14 +265,13 @@ class PromptArguments:
         default=False,
         metadata={"help": "Whether init prompt with spot asoc tokens."},
     )
-    record2: str = field(
-        default=None, 
-        metadata={"help": "record2"},
-    )
     negative_ratio: float = field(
         default=0.7, metadata={"help": "The keep rate of negative spot or asoc."}
     )
     other_ratio: float = field(
         default=0., metadata={"help": "The noise rate of null asoc."}
+    )
+    record2: str = field(
+        default=None, metadata={"help": "record2"}
     )
 

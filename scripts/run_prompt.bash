@@ -272,5 +272,5 @@ CUDA_VISIBLE_DEVICES=${CUDA_VISIBLE_DEVICES} python3 run.py \
     --use_task=${use_task:-"True"} \
     --init_prompt=${init_prompt:-"True"} \
     --freeze_LM=${freeze_LM:-"False"} \
-    --record2=${record2:-""} \
+    --record2=${record2} \
     --seed=${seed} --disable_tqdm=${disable_tqdm}

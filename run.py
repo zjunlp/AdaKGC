@@ -6,11 +6,8 @@ import sys
 import numpy as np
 from datasets import load_dataset
 
-from thefuzz import fuzz
 import random
-from gensim.test.utils import datapath, get_tmpfile
-from gensim.models import KeyedVectors
-from gensim.scripts.glove2word2vec import glove2word2vec
+
 
 import torch
 import transformers
@@ -37,14 +34,20 @@ from adakgc.data_module.text2spotasoc import text2spotasoc
 from adakgc.models.models import T5Prompt, EMA 
 
 
-os.environ["CUDA_DEVICE_ORDER"]="PCI_BUS_ID"
-os.environ["CUDA_VISIBLE_DEVICES"]='1'
+#os.environ["CUDA_DEVICE_ORDER"]="PCI_BUS_ID"
+#os.environ["CUDA_VISIBLE_DEVICES"]='1'
 os.environ["WANDB_DISABLED"] = "true"
 os.environ["HF_DATASETS_CACHE"] = "/newdisk2/guihh/.cache/huggingface/datasets"
 logger = logging.getLogger("__main__")
 
 
+
 def get_negative_samples(l, k):
+    from thefuzz import fuzz
+    import random
+    from gensim.test.utils import datapath, get_tmpfile
+    from gensim.models import KeyedVectors
+    from gensim.scripts.glove2word2vec import glove2word2vec
     glove_file = datapath('/newdisk2/guihh/.cache/GloVe/glove.6B.300d.txt')
     word2vec_glove_file = get_tmpfile("glove.6B.300d.word2vec.txt")
     glove2word2vec(glove_file, word2vec_glove_file)
@@ -127,6 +130,9 @@ def main():
     if is_main_process(training_args.local_rank):
         transformers.utils.logging.set_verbosity_info()
     logger.info("Training/evaluation parameters %s", training_args)
+    logger.info(f"model_args: {model_args}")
+    logger.info(f"data_args: {data_args}")
+    logger.info(f"prompt_args: {prompt_args}")
 
 
 
@@ -255,7 +261,8 @@ def main():
         logger.info(f"negative_sample_ids: {negative_sample_ids}")
 
         model.init_prompt(spot_ids, asoc_ids, negative_sample_ids, spot_prompt, asoc_prompt, [tokenizer.pad_token_id])
-
+    
+    return
 
 
     if training_args.do_train:
