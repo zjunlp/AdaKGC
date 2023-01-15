@@ -173,7 +173,7 @@ task_dict = {
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument('--data', default='data/relation/NYT')
+    parser.add_argument('--dataname', default='data/relation/NYT')
     parser.add_argument('--model', default='hf_models/t5-v1_1-base')
     parser.add_argument('--task', default='relation')
     parser.add_argument('--mode', default='H')
@@ -207,7 +207,7 @@ def main():
 
     model_path = '_'.join(options.model.split('/')[1:]).replace('/', '_')
     os.makedirs(f'output_infer/{model_path}', exist_ok = True)
-    data_dir = options.data.replace('/', '_')
+    data_dir = options.dataname.replace('/', '_')
     output_dir = f'output_infer/{model_path}/{data_dir}'
     if options.CD:
         output_dir += '_CD'
@@ -228,7 +228,7 @@ def main():
 
 
     predictor = HuggingfacePromptPredictor(args=options) 
-    predictor.load_schema(f"{options.data}/schema.json", options.CD)  
+    predictor.load_schema(f"{options.dataname}/schema.json", options.CD)  
     map_config = MapConfig.load_from_yaml(options.map_config)
     schema_dict = SEL2Record.load_schema_dict(options.data_folder)
     sel2record = SEL2Record(
@@ -237,7 +237,7 @@ def main():
     )
 
     for split, split_name in [('test', 'test')]:
-        gold_filename = f"{options.data}/{split}.json"
+        gold_filename = f"{options.dataname}/{split}.json"
 
         text_list = [x['text'] for x in read_json_file(gold_filename)]
         token_list = [x['tokens'] for x in read_json_file(gold_filename)]
