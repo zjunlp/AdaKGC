@@ -222,7 +222,7 @@ echo ${output_name}
 export output_name
 
 
-CUDA_VISIBLE_DEVICES=${CUDA_VISIBLE_DEVICES} python3 run.py \
+CUDA_VISIBLE_DEVICES=${CUDA_VISIBLE_DEVICES} python3 run_finetune.py \
     --do_train --do_eval --do_predict ${constraint_decoding} ${fp16} \
     --use_fast_tokenizer=True \
     --from_checkpoint=True \

@@ -24,6 +24,7 @@ from adakgc.models.models import T5Prompt
 from adakgc.models import get_constraint_decoder
 
 
+
 logger = logging.getLogger(__name__)
 
 split_bracket = re.compile(r"\s*<extra_id_\d>\s*")
@@ -62,7 +63,7 @@ def schema_to_spotasoc(schema: RecordSchema, tokenizer):
 class HuggingfacePromptPredictor:
     def __init__(self, args) -> None:
         self._tokenizer = T5TokenizerFast.from_pretrained(args.model)
-        self._device = f"cuda:{args.cuda}" if torch.cuda.is_available() else "cpu"
+        self._device = "cuda" if torch.cuda.is_available() else "cpu"
         self._model = T5Prompt(self._tokenizer, args.t5_path, args).to(self._device)
         self._model.load_state_dict(torch.load(os.path.join(args.model, 'pytorch_model.bin'), map_location=self._device))
         self._model.eval()
@@ -190,9 +191,9 @@ def main():
     parser.add_argument('--match_mode', default='normal', choices=['set', 'normal', 'multimatch'])
 
     parser.add_argument('--CD', action='store_true')
-    parser.add_argument('--use_ssi', action='store_true')
-    parser.add_argument('--use_task', action='store_true')
-    parser.add_argument('--use_prompt', action='store_true')
+    parser.add_argument('--use_ssi', default=True, type=bool)
+    parser.add_argument('--use_task', default=True, type=bool)
+    parser.add_argument('--use_prompt', default=True, type=bool)
     parser.add_argument('--prompt_len', default=10, type=int)
     parser.add_argument('--prompt_dim', default=512, type=int)
     
@@ -200,6 +201,7 @@ def main():
     options = parser.parse_args()
     map_config = MapConfig.load_from_yaml(options.map_config)
     predictor = HuggingfacePromptPredictor(args=options) 
+
 
     # only F1 value
     if options.task == "relation":
@@ -215,7 +217,7 @@ def main():
     logging.basicConfig(
         format="%(message)s",
         datefmt="%m/%d/%Y %H:%M:%S",
-        handlers=[logging.StreamHandler(sys.stdout), logging.FileHandler(f'output_infer/{model_path}'+'/log.txt', mode = 'w', encoding = 'utf-8')],
+        handlers=[logging.StreamHandler(sys.stdout), logging.FileHandler(f'output_infer/{model_path}'+'/log.txt', mode = 'a', encoding = 'utf-8')],
     )
     logger.setLevel(logging.INFO)
     logger.info(f"config: {vars(options)}")
@@ -239,10 +241,11 @@ def main():
 
 
         predictor.load_schema(f"{data}/schema.json", options.CD)  
-        schema_dict = SEL2Record.load_schema_dict(data)
+        schema_dict = SEL2Record.load_schema_dict(f"{data}/schema.json")
         sel2record = SEL2Record(
             schema_dict=schema_dict,
             map_config=map_config,
+            task=options.task,
         )
 
 

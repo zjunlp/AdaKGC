@@ -1,11 +1,13 @@
 #!/usr/bin/env python
 # -*- coding:utf-8 -*-
-from collections import defaultdict, OrderedDict
 import os
+import json
+import logging
+from collections import defaultdict, OrderedDict
 from adakgc.utils.record_schema import RecordSchema
 from adakgc.extraction.predict_parser import SpotAsocPredictParser
 from adakgc.sel2record.record import EntityRecord, MapConfig, RelationRecord, EventRecord
-import logging
+
 
 logger = logging.getLogger("__main__")
 
@@ -19,7 +21,7 @@ task_record_map = {
 
 
 
-def proprocessing_graph_record(graph, schema_dict):
+def proprocessing_graph_record(graph, schema_dict, task):
     """ Mapping generated spot-asoc result to Entity/Relation/Event
     将抽取的Spot-Asoc结构, 根据不同的 Schema 转换成 Entity/Relation/Event 结果
     """
@@ -30,32 +32,28 @@ def proprocessing_graph_record(graph, schema_dict):
     }
 
     entity_dict = OrderedDict()
-
-    # 根据不同任务的 Schema 将不同的 Spot 对应到不同抽取结果： Entity/Event
-    # Mapping generated spot result to Entity/Event
+    
     for record in graph['pred_record']:
-
-        if record['type'] in schema_dict['entity'].type_list:
-            records['entity'] += [{
-                'text': record['spot'],
-                'type': record['type']
-            }]
-            entity_dict[record['spot']] = record['type']
-
-        elif record['type'] in schema_dict['event'].type_list:
-            records['event'] += [{
-                'trigger': record['spot'],
-                'type': record['type'],
-                'roles': record['asocs']
-            }]
+        if record['type'] in schema_dict.type_list:
+            if task == "event":
+                records['event'] += [{
+                    'trigger': record['spot'],
+                    'type': record['type'],
+                    'roles': record['asocs']
+                }]
+            else:
+                records['entity'] += [{
+                    'text': record['spot'],
+                    'type': record['type']
+                }]
+                entity_dict[record['spot']] = record['type']
 
         else:
             print("Type `%s` invalid." % record['type'])
 
-    # 根据不同任务的 Schema 将不同的 Asoc 对应到不同抽取结果： Relation/Argument
-    # Mapping generated asoc result to Relation/Argument
+
     for record in graph['pred_record']:
-        if record['type'] in schema_dict['entity'].type_list:
+        if record['type'] in schema_dict.type_list:
             for role in record['asocs']:
                 records['relation'] += [{
                     'type': role[0],
@@ -65,9 +63,9 @@ def proprocessing_graph_record(graph, schema_dict):
                     ]
                 }]
 
-    if len(entity_dict) > 0:
+    if len(entity_dict) > 0 and task == "event":
         for record in records['event']:
-            if record['type'] in schema_dict['event'].type_list:
+            if record['type'] in schema_dict.type_list:
                 new_role_list = list()
                 for role in record['roles']:
                     if role[1] in entity_dict:
@@ -77,13 +75,15 @@ def proprocessing_graph_record(graph, schema_dict):
     return records
 
 
+
 class SEL2Record:
-    def __init__(self, schema_dict, map_config: MapConfig) -> None:
+    def __init__(self, schema_dict, map_config: MapConfig, task) -> None:
         self._schema_dict = schema_dict
         self._predict_parser = SpotAsocPredictParser(
-            label_constraint=schema_dict['record'],
+            label_constraint=schema_dict,
         )
         self._map_config = map_config
+        self._task = task
 
     def __repr__(self) -> str:
         return f"## {self._map_config}"
@@ -99,9 +99,10 @@ class SEL2Record:
         )
 
         # Convert String-level Record to Entity/Relation/Event
-        pred_records = proprocessing_graph_record(      # 上面decode传入的是[pred]，当然只有1个啊
+        pred_records = proprocessing_graph_record(      
             well_formed_list[0],
-            self._schema_dict
+            self._schema_dict,
+            self._task,
         )
 
 
@@ -128,15 +129,9 @@ class SEL2Record:
 
 
     @staticmethod
-    def load_schema_dict(schema_folder):
-        schema_dict = dict()
-        for schema_key in ['record', 'entity', 'relation', 'event']:
-            schema_filename = os.path.join(schema_folder, f'{schema_key}.schema')
-            if os.path.exists(schema_filename):
-                schema_dict[schema_key] = RecordSchema.read_from_file(
-                    schema_filename
-                )
-            else:
-                logger.warning(f"{schema_filename} is empty, ignore.")
-                schema_dict[schema_key] = RecordSchema.get_empty_schema()
-        return schema_dict
+    def load_schema_dict(schema_file):
+        lines = open(schema_file).readlines()
+        type_list = json.loads(lines[0])
+        role_list = json.loads(lines[1])
+        type_role_dict = json.loads(lines[2])
+        return RecordSchema(type_list, role_list, type_role_dict)

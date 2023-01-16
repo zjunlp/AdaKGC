@@ -64,7 +64,7 @@ def schema_to_spotasoc(schema: RecordSchema, tokenizer):
 class HuggingfacePromptPredictor:
     def __init__(self, args) -> None:
         self._tokenizer = T5TokenizerFast.from_pretrained(args.model)
-        self._device = f"cuda:{args.cuda}" if torch.cuda.is_available() else "cpu"
+        self._device = f"cuda" if torch.cuda.is_available() else "cpu"
         self._model = T5Prompt(self._tokenizer, f'{cwd}/hf_models/mix', args).to(self._device)
         self._model.load_state_dict(torch.load(os.path.join(args.model, 'pytorch_model.bin'), map_location=self._device))
         self._model.eval()
@@ -220,7 +220,7 @@ def main():
     logging.basicConfig(
         format="%(asctime)s - %(funcName)s - %(lineno)d - %(message)s",
         datefmt="%m/%d/%Y %H:%M:%S",
-        handlers=[logging.StreamHandler(sys.stdout), logging.FileHandler(output_dir+'/log.txt', mode = 'w', encoding = 'utf-8')],
+        handlers=[logging.StreamHandler(sys.stdout), logging.FileHandler(output_dir+'/log.txt', mode = 'a', encoding = 'utf-8')],
     )
     logger.setLevel(logging.INFO)
     logger.info(f"config: f{vars(options)}")
@@ -230,10 +230,11 @@ def main():
     predictor = HuggingfacePromptPredictor(args=options) 
     predictor.load_schema(f"{options.dataname}/schema.json", options.CD)  
     map_config = MapConfig.load_from_yaml(options.map_config)
-    schema_dict = SEL2Record.load_schema_dict(options.data_folder)
+    schema_dict = SEL2Record.load_schema_dict(f"{options.dataname}/schema.json")
     sel2record = SEL2Record(
         schema_dict=schema_dict,
         map_config=map_config,
+        task=options.task,
     )
 
     for split, split_name in [('test', 'test')]:

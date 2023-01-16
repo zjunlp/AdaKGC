@@ -262,7 +262,6 @@ def main():
 
         model.init_prompt(spot_ids, asoc_ids, negative_sample_ids, spot_prompt, asoc_prompt, [tokenizer.pad_token_id])
     
-    return
 
 
     if training_args.do_train:
