@@ -65,7 +65,7 @@ data/oneie/ace05-EN
 
 Note:
 
-- `nltk==3.5` is used in our experiments, we found `nltk==3.6+` may leads different sentence numbers.
+- `nltk==3.5` is used in our experiments, we found `nltk==3.6+` may lead to different sentence numbers.
 - Ensure that the tree structure of the data is consistent with what we have listed above.
 
 # Convert Raw Dataset to Iteration Dataset
@@ -161,7 +161,7 @@ The configuration file name also indicates some information about the iteration 
 
 #### Schema Hierarchy
 
-The schemas of the three datasets used in AdaKGC all have a hierarchical structure (on the NYT dataset, we have built a hierarchical schema ourselves). Schema hierarchy usually has a two-layer structure. Here, for simplicity, we call it **`parent class`** and **`child class`**. The parent class can be regarded as a coarse grained label, while the subclass is a fine grained label.
+The schemas of the three datasets used in AdaKGC all have a hierarchical structure (on the NYT dataset, we have built a hierarchical schema ourselves). Schema hierarchy usually has a two-layer structure. Here, for simplicity, we call it **`parent class`** and **`child class`**. The parent class can be regarded as a coarse-grained label, while the subclass is a fine-grained label.
 
 The following is an example of schema hierarchy in three datasets:
 
