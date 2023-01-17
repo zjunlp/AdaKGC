@@ -173,10 +173,10 @@ task_dict = {
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument('--dataname', default='data/relation/NYT')
-    parser.add_argument('--model', default='hf_models/t5-v1_1-base')
-    parser.add_argument('--task', default='relation')
-    parser.add_argument('--mode', default='H')
+    parser.add_argument('--dataname', default='data/relation/NYT', type=str)
+    parser.add_argument('--model', default='hf_models/t5-v1_1-base', type=str)
+    parser.add_argument('--task', default='relation', type=str)
+    parser.add_argument('--mode', default='H', type=str)
     parser.add_argument('--cuda', default='0')
 
     parser.add_argument('--max_source_length', default=256, type=int)
@@ -187,13 +187,13 @@ def main():
     parser.add_argument('--verbose', action='store_true')
     parser.add_argument('--match_mode', default='normal', choices=['set', 'normal', 'multimatch'])
     
-
+    parser.add_argument('--CD', action='store_true')
     parser.add_argument('--use_ssi', action='store_true')
     parser.add_argument('--use_task', action='store_true')
     parser.add_argument('--use_prompt', action='store_true')
     parser.add_argument('--prompt_len', default=10, type=int)
     parser.add_argument('--prompt_dim', default=512, type=int)
-    parser.add_argument('--CD', action='store_true')
+    
 
                 
     options = parser.parse_args()

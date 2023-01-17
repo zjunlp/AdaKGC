@@ -73,7 +73,7 @@ bash scripts/run_finetune.bash --model=hf_models/t5-v1_1-base --data=data/iter_1
 
 ```bash
 . config/prompt_conf/ace05_event_H.ini
-CUDA_VISIBLE_DEVICES=0 python3 eval/inference.py --dataname=data/iter_1/ace05_event_H --model=output/ace05_event_H_e30_lr1e-4_b14_n0.8_prompt_80_800 --task=event --cuda=0 --mode=H --use_ssi=${use_ssi} --use_task=${use_task} --use_prompt=${use_prompt} --prompt_len=${prompt_len} --prompt_dim=${prompt_dim}
+CUDA_VISIBLE_DEVICES=0 python3 eval/inference.py --dataname=data/iter_1/ace05_event_H --model=output/ace05_event_H_e30_lr1e-4_b16_n0.8_prompt_80_512 --task=event --cuda=0 --mode=H --use_ssi=${use_ssi} --use_task=${use_task} --use_prompt=${use_prompt} --prompt_len=${prompt_len} --prompt_dim=${prompt_dim}
 
 ```
 
@@ -83,7 +83,7 @@ CUDA_VISIBLE_DEVICES=0 python3 eval/inference.py --dataname=data/iter_1/ace05_ev
 
 ```bash
 . config/prompt_conf/ace05_event_H.ini
-CUDA_VISIBLE_DEVICES=0 python3 eval/inference.py --dataname=ace05_event --model=output/ace05_event_H_e30_lr1e-4_b14_n0.8_prompt_80_800 --task=event --cuda=0 --mode=H --use_ssi=${use_ssi} --use_task=${use_task} --use_prompt=${use_prompt} --prompt_len=${prompt_len} --prompt_dim=${prompt_dim}
+CUDA_VISIBLE_DEVICES=0 python3 eval/inference.py --dataname=ace05_event --model=output/ace05_event_H_e30_lr1e-4_b16_n0.8_prompt_80_512 --task=event --cuda=0 --mode=H --use_ssi=${use_ssi} --use_task=${use_task} --use_prompt=${use_prompt} --prompt_len=${prompt_len} --prompt_dim=${prompt_dim}
 
 ```
 
@@ -96,6 +96,7 @@ mode=H
 dataset_name=ace05_event
 task=event
 device=0
+output_name=ace05_event_H_e30_lr1e-4_b16_n0.8_prompt_80_512
 . config/prompt_conf/${dataset_name}_${mode}.ini 
 bash scripts/run_finetune.bash --model=hf_models/mix --data=data/iter_1/${dataset_name}_${mode} --output=output/${dataset_name} --mode=${mode} --device=${device} 
 CUDA_VISIBLE_DEVICES=${device} python3 eval/inference_mul.py --dataname=${dataset_name} --model=${output_name} --task=${task} --mode=${mode} --use_ssi=${use_ssi} --use_task=${use_task} --use_prompt=${use_prompt} --prompt_len=${prompt_len} --prompt_dim=${prompt_dim}
@@ -103,8 +104,6 @@ CUDA_VISIBLE_DEVICES=${device} python3 eval/inference_mul.py --dataname=${datase
 
 
 ```
-
-
 
 | Metric               | Definition                                                                              |
 | -------------------- | --------------------------------------------------------------------------------------- |
@@ -116,7 +115,6 @@ CUDA_VISIBLE_DEVICES=${device} python3 eval/inference_mul.py --dataname=${datase
 # Acknowledgment
 
 Part of our code is borrowed from [UIE](https://github.com/universal-ie/UIE) and [UnifiedSKG](https://github.com/hkunlp/unifiedskg), many thanks.
-
 
 # Papers for the Project & How to Cite
 

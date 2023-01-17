@@ -17,7 +17,7 @@ class ConstraintSeq2SeqTrainingArguments(Seq2SeqTrainingArguments):
     save_better_checkpoint: bool = field(default=False, metadata={"help": "Whether to save better metric checkpoint"})
     start_eval_step: int = field(default=0, metadata={"help": "Start Evaluation after Eval Step"})
     use_ema: bool = field(default=False, metadata={"help": "Whether to use EMA"})
-    freeze_LM: bool = field(default=False, metadata={"help": "freeze LM"}) 
+    freeze_LM: bool = field(default=False, metadata={"help": "Whether to freeze Pretrained LM"}) 
 
 
 
@@ -76,10 +76,6 @@ class DataTrainingArguments:
     text_column: Optional[str] = field(
         default='text',
         metadata={"help": "The name of the column in the datasets containing the full texts (for summarization)."},
-    )
-    record_column: Optional[str] = field(
-        default='record',
-        metadata={"help": "The name of the column in the datasets containing the summaries (for summarization)."},
     )
     train_file: Optional[str] = field(
         default=None, metadata={"help": "The input training data file (a jsonlines or csv file)."}
@@ -230,28 +226,17 @@ class DataTrainingArguments:
     
 @dataclass
 class PromptArguments:
-    src_seq_ratio: float = field(
-        default=0, metadata={"help": "src seq ratio."}
-    )
-    length_penalty: bool = field(
-        default=True,
-        metadata={"help": "length penalty."},
-    )
     use_ssi: bool = field(
         default=True,
-        metadata={"help": "use SSI."},
+        metadata={"help": "Whether to use SSI."},
     )
     use_prompt: bool = field(
         default=True, 
-        metadata={"help": "ues prompt"},
+        metadata={"help": "Whether to ues prompt."},
     )
     use_task: bool = field(
         default=True, 
-        metadata={"help": "ues task"},
-    )
-    learn_weights: bool = field(
-        default=True,
-        metadata={"help": "learn weights"},
+        metadata={"help": "Whether to ues task prompt"},
     )
     prompt_len: int = field(
         default=80,
@@ -263,13 +248,13 @@ class PromptArguments:
     )
     init_prompt: bool = field(
         default=False,
-        metadata={"help": "Whether init prompt with spot asoc tokens."},
+        metadata={"help": "Whether to init prompt with spot asoc tokens."},
     )
     negative_ratio: float = field(
-        default=0.7, metadata={"help": "The keep rate of negative spot or asoc."}
+        default=0.7, metadata={"help": "The rate of negative spot or asoc."}
     )
     other_ratio: float = field(
-        default=0., metadata={"help": "The noise rate of null asoc."}
+        default=0., metadata={"help": "The noise rate of."}
     )
     record2: str = field(
         default=None, metadata={"help": "record2"}

@@ -37,7 +37,7 @@ from adakgc.models.models import T5Prompt, EMA
 #os.environ["CUDA_DEVICE_ORDER"]="PCI_BUS_ID"
 #os.environ["CUDA_VISIBLE_DEVICES"]='1'
 os.environ["WANDB_DISABLED"] = "true"
-os.environ["HF_DATASETS_CACHE"] = "/newdisk2/guihh/.cache/huggingface/datasets"
+os.environ["HF_DATASETS_CACHE"] = "/nature/ghh/.cache/huggingface/datasets"
 logger = logging.getLogger("__main__")
 
 
@@ -48,7 +48,7 @@ def get_negative_samples(l, k):
     from gensim.test.utils import datapath, get_tmpfile
     from gensim.models import KeyedVectors
     from gensim.scripts.glove2word2vec import glove2word2vec
-    glove_file = datapath('/newdisk2/guihh/.cache/GloVe/glove.6B.300d.txt')
+    glove_file = datapath('/nature/ghh/.cache/GloVe/glove.6B.300d.txt')
     word2vec_glove_file = get_tmpfile("glove.6B.300d.word2vec.txt")
     glove2word2vec(glove_file, word2vec_glove_file)
     model = KeyedVectors.load_word2vec_format(word2vec_glove_file)
@@ -276,8 +276,7 @@ def main():
 
 
     text_column = data_args.text_column
-    record_column = data_args.record_column
-    logger.info('Using src: %s and tgt: %s' % (text_column, record_column)) # Using src: text and tgt: record
+    logger.info('Using src: %s' % (text_column)) # Using src: text and tgt: record
 
     # Temporarily set max_target_length for training.
     max_target_length = data_args.max_target_length
