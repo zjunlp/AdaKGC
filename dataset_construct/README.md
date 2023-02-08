@@ -4,25 +4,27 @@ Note: First of all, make sure your current path is **`*/AdaKGC/dataset_construct
 
 # Quick links
 
-* [Obtain Raw Dataset](#Obtain Raw Dataset)
+* [Obtain Raw Dataset](#obtain-raw-dataset)
 
-  * [Few-NERD](###Few-NERD)
-  * [NYT](###NYT)
-  * [ACE05-Evt](###ACE05-Evt)
-* [Convert Raw Dataset to Iteration Datase](#Convert Raw Dataset to Iteration Dataset)
+  * [Few-NERD](#few-nerd)
+  * [NYT](#nyt)
+  * [ACE05-Evt](#ace05-evt)
+* [Convert Raw Dataset to Iteration Datase](#convert-raw-dataset-to-iteration-dataset)
 
-  * [Details of Dataset Conversion](##Details of Dataset Conversion)
-    * [Example of Dataset Configuration file](####Example of Dataset Configuration file)
-  * [File Name Format](##File Name Format)
-    * [Schema Hierarchy](####Schema Hierarchy)
-    * [Segmentation Mode](####Segmentation Mode)
-    * [Iteration change](####Iteration change)
-* [Data Format](#Data Format)
+  * [Details of Dataset Conversion](#details-of-dataset-conversion)
+    * [Example of Dataset Configuration file](#example-of-dataset-configuration-file)
+  * [File Name Format](#file-name-format)
+    * [Schema Hierarchy](#schema-hierarchy)
+    * [Segmentation Mode](#segmentation-mode)
+    * [Iteration change](#iteration-change)
+* [Data Format](#data-format)
 
-  * [Example of instance from ACE05_Event](####Example of instance from ACE05_Event)
-* [Acknowledgement](#Acknowledgement)
+  * [Example of instance from ACE05_Event](#example-of-instance-from-ace05-event)
+* [Acknowledgement](#acknowledgement)
 
 # Obtain Raw Dataset
+
+`<a id="obtain-raw-dataset"></a>`
 
 We follow the following methods to obtain raw data. We sincerely thank previous works.
 
@@ -33,6 +35,8 @@ We follow the following methods to obtain raw data. We sincerely thank previous 
 | ACE05-Evt | [OneIE](http://blender.cs.illinois.edu/software/oneie/)                             |
 
 ### Few-NERD
+
+`<a id="few-nerd"></a>`
 
 ```bash
 mkdir -p data/Few-NERD
@@ -51,6 +55,8 @@ data/Few-NERD
 
 ### NYT
 
+`<a id="nyt"></a>`
+
 ```bash
 mkdir data/NYT-multi
 wget -P data/NYT-multi https://raw.githubusercontent.com/yubowen-ph/JointER/master/dataset/NYT-multi/data/train.json
@@ -66,6 +72,8 @@ data/Few-NERD
 ```
 
 ### ACE05-Evt
+
+`<a id="ace05-evt"></a>`
 
 The preprocessing code of ACE05-Evt is following [OneIE](http://blender.cs.illinois.edu/software/oneie/).
 Please follow the instructions and put preprocessed dataset at `data/oneie`:
@@ -90,6 +98,8 @@ Note:
 
 # Convert Raw Dataset to Iteration Dataset
 
+`<a id="convert-raw-dataset-to-iteration-datset"></a>`
+
 You can obtain all iteration datasets by running the following code:
 
 ```shell
@@ -100,11 +110,15 @@ All iteration datasets will be located in the **`/AdaKGC/data`** directory.
 
 ## Details of Dataset Conversion
 
+`<a id="details-of-dataset-conversion"></a>`
+
 Now let's introduce the details of dataset conversion.
 
 Each iteration dataset has a corresponding configuration file and the configuration file is placed under the directory **`AdaKGC/config/data_config`**.
 
 #### Example of Dataset Configuration file
+
+`<a id="example-of-dataset-configuration-file"></a>`
 
 ```yaml
 # AdaKGC/config/data_config/event/ace05_event_M3.yaml
@@ -177,9 +191,13 @@ mapper:
 
 ## File Name Format
 
+`<a id="file-name-format"></a>`
+
 The configuration file name also indicates some information about the iteration dataset. E.g. **`ace05_event_H2`**, where **`H`** indicates that its segmentation mode is horizontal segmentation, and **`2`** indicates iteration 2.
 
 #### Schema Hierarchy
+
+`<a id="schema-hierarchy"></a>`
 
 The schemas of the three datasets used in AdaKGC all have a hierarchical structure (on the NYT dataset, we have built a hierarchical schema ourselves). Schema hierarchy usually has a two-layer structure. Here, for simplicity, we call it **`parent class`** and **`child class`**. The parent class can be regarded as a coarse-grained label, while the subclass is a fine-grained label.
 
@@ -193,6 +211,8 @@ building-library       # Few-NERD: building is parent class, library is child cl
 
 #### Segmentation Mode
 
+`<a id="segmentation-mode"></a>`
+
 * **`H`**: Horizontal segmentation, Using only child class as label, each iteration will add several child class schema nodes (add or remove labels from **`delete_list`**). So the number of labels per iteration is variable.
 * **`V`**: Vertical segmentation, Using both parent class and child class as label, each iteration **`mapper`** will change several labels from parent class to child class (**`delete_list`** is always empty). So the number of labels in each iteration is unchanged, but the content of labels change from parent class to child class.
 * **`M`**: Mixed segmentation, A mixture of H and V.
@@ -200,9 +220,13 @@ building-library       # Few-NERD: building is parent class, library is child cl
 
 #### Iteration change
 
+`<a id="iteration-change"></a>`
+
 Each iteration will change a fixed number of schema nodes, 2 for NYT, 3 for ACE05_Event, and 6 for Few-NERD. **`iteration 1`** usually has the minimum number of schema nodes, and **`iteration 7`** has the maximum number of schema nodes.
 
 # Data Format
+
+`<a id="data-format"></a>`
 
 We use the same data format as UIE, each iteration dataset has the following items:
 
@@ -216,6 +240,8 @@ data/iter_1/NYT_H
 ```
 
 #### Example of instance from ACE05_Event
+
+`<a id="example-of-instance-from-ace05-event"></a>`
 
 ```json
 {
@@ -246,5 +272,7 @@ data/iter_1/NYT_H
 ```
 
 # Acknowledgement
+
+`<a id="acknowledgement"></a>`
 
 Parts of the code are modified from [UIE](https://github.com/universal-ie/UIE). We appreciate the authors for making their projects open-sourced.
