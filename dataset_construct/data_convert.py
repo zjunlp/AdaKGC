@@ -87,10 +87,10 @@ def convert_graph(
 def main():
     import argparse
     parser = argparse.ArgumentParser()
-    parser.add_argument("--config", dest="config", default="data_config/entity")
-    parser.add_argument("--iter_num", dest="iter_num", default=7, type=int)
-    parser.add_argument("--task", dest="task", default="NYT", choices=['NYT', 'Few-NERD', 'ace05_event'])
-    parser.add_argument("--mode", dest="mode", default="V")
+    parser.add_argument("--config", dest="config", default="../config/data_config/relation", help="Dictory which contains config file used to convert dataset")
+    parser.add_argument("--iter_num", dest="iter_num", default=7, type=int, help="Iteration number")
+    parser.add_argument("--task", dest="task", default="NYT", choices=['NYT', 'Few-NERD', 'ace05_event'], help="Task dataset name")
+    parser.add_argument("--mode", dest="mode", default="V", choices=['V', 'H', 'M', 'R'], help="Segmentation Mode, H: Horizontal segmentation, V: Vertical segmentation, M: Mixed segmentation, R: Replacement segmentation")
     options = parser.parse_args()
 
     global logger
@@ -102,7 +102,7 @@ def main():
         dataset = Dataset.load_yaml_file(filename)
         datasets = dataset.load_dataset(logger_name=f"{options.task}_{options.mode}")    
         label_mapper = dataset.mapper
-        output_name = f"../data/iter_{it}/{options.task}_{options.mode}"  
+        output_name = f"../data/{options.task}_{options.mode}/iter_{it}"  
 
         convert_graph(
             output_name,

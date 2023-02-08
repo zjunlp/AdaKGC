@@ -2,6 +2,26 @@ Data construction code for [`Schema-adaptable Knowledge Graph Construction`]()
 
 Note: First of all, make sure your current path is **`*/AdaKGC/dataset_construct`**
 
+# Quick links
+
+* [Obtain Raw Dataset](#Obtain Raw Dataset)
+
+  * [Few-NERD](###Few-NERD)
+  * [NYT](###NYT)
+  * [ACE05-Evt](###ACE05-Evt)
+* [Convert Raw Dataset to Iteration Datase](#Convert Raw Dataset to Iteration Dataset)
+
+  * [Details of Dataset Conversion](##Details of Dataset Conversion)
+    * [Example of Dataset Configuration file](####Example of Dataset Configuration file)
+  * [File Name Format](##File Name Format)
+    * [Schema Hierarchy](####Schema Hierarchy)
+    * [Segmentation Mode](####Segmentation Mode)
+    * [Iteration change](####Iteration change)
+* [Data Format](#Data Format)
+
+  * [Example of instance from ACE05_Event](####Example of instance from ACE05_Event)
+* [Acknowledgement](#Acknowledgement)
+
 # Obtain Raw Dataset
 
 We follow the following methods to obtain raw data. We sincerely thank previous works.
@@ -225,6 +245,6 @@ data/iter_1/NYT_H
 
 ```
 
-## Acknowledgement
+# Acknowledgement
 
 Parts of the code are modified from [UIE](https://github.com/universal-ie/UIE). We appreciate the authors for making their projects open-sourced.
