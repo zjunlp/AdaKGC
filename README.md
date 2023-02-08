@@ -13,7 +13,7 @@
 
 # Requirements
 
-`<a id="requirements"></a>`
+<a id="requirements"></a>
 
 To run the codes, you need to install the requirements:
 
@@ -26,7 +26,7 @@ pip install -r requirements.txt
 
 # Datasets of Extraction Tasks
 
-`<a id="datasets-of-extraction-tasks"></a>`
+<a id="datasets-of-extraction-tasks"></a>
 
 Details of dataset construction see [Data Construction](./dataset_construct/README.md).
 
@@ -36,7 +36,7 @@ Dataset [[Google Drive]]()
 
 # How to run
 
-`<a id="how-to-run"></a>`
+<a id="how-to-run"></a>
 
 ```python
 mkdir hf_models
@@ -50,7 +50,7 @@ mkdir output           # */AdaKGC/output
 
 + ## Named Entity Recognition Task
 
-  `<a id="ner"></a>`
+  <a id="ner"></a>
 
 ```bash
 # Current path:  */AdaKGC
@@ -75,7 +75,7 @@ bash scripts/run_finetune.bash --model=hf_models/t5-v1_1-base --data=data/Few-NE
 
 + ## Relation Extraction Task
 
-  `<a id="re"></a>`
+  <a id="re"></a>
 
 ```bash
 . config/prompt_conf/NYT_H.ini  
@@ -84,7 +84,7 @@ bash scripts/run_finetune.bash --model=hf_models/t5-v1_1-base --data=data/NYT_H/
 
 + ## Event Extraction Task
 
-  `<a id="ee"></a>`
+  <a id="ee"></a>
 
 ```bash
 . config/prompt_conf/ace05_event_H.ini  
@@ -93,7 +93,7 @@ bash scripts/run_finetune.bash --model=hf_models/t5-v1_1-base --data=data/ace05_
 
 # Inference
 
-`<a id="inference"></a>`
+<a id="inference"></a>
 
 * Only inference on single dataset(`data/ace05_event_H/iter_1`)
 
@@ -115,7 +115,7 @@ CUDA_VISIBLE_DEVICES=0 python3 eval/inference_mul.py --dataname=ace05_event --mo
 
 `datasetname`: datasets name(`ace05_event`、`NYT` or `Few-NERD`).
 
-Complete process (in `scripts/run.bash`):
+Complete process including fine-tune and inference (in `scripts/run.bash`):
 
 ```bash
 mode=H
@@ -140,7 +140,7 @@ CUDA_VISIBLE_DEVICES=${device} python3 eval/inference_mul.py --dataname=${datase
 
 # Acknowledgment
 
-`<a id="acknowledgment"></a>`
+<a id="acknowledgment"></a>
 
 Part of our code is borrowed from [UIE](https://github.com/universal-ie/UIE) and [UnifiedSKG](https://github.com/hkunlp/unifiedskg), many thanks.
 
