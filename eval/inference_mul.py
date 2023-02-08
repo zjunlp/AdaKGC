@@ -224,7 +224,7 @@ def main():
 
     data_folder = []
     for it in range(1, options.iter_num + 1):
-        data_folder.append(f"data/iter_{it}/{options.dataname}_{options.mode}")
+        data_folder.append(f"data/{options.dataname}_{options.mode}/iter_{it}")
 
 
 
