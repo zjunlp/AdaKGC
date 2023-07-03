@@ -1,4 +1,6 @@
-- Code for [`Schema-adaptable Knowledge Graph Construction`]()
+# AdaKGC
+
+Code for the paper [`Schema-adaptable Knowledge Graph Construction`](https://arxiv.org/abs/2305.08703).
 
 # Quick Links
 
@@ -149,5 +151,22 @@ Part of our code is borrowed from [UIE](https://github.com/universal-ie/UIE) and
 If you use or extend our work, please cite the paper as follows:
 
 ```bibtex
-
+@article{DBLP:journals/corr/abs-2305-08703,
+  author       = {Hongbin Ye and
+                  Honghao Gui and
+                  Xin Xu and
+                  Huajun Chen and
+                  Ningyu Zhang},
+  title        = {Schema-adaptable Knowledge Graph Construction},
+  journal      = {CoRR},
+  volume       = {abs/2305.08703},
+  year         = {2023},
+  url          = {https://doi.org/10.48550/arXiv.2305.08703},
+  doi          = {10.48550/arXiv.2305.08703},
+  eprinttype    = {arXiv},
+  eprint       = {2305.08703},
+  timestamp    = {Wed, 17 May 2023 15:47:36 +0200},
+  biburl       = {https://dblp.org/rec/journals/corr/abs-2305-08703.bib},
+  bibsource    = {dblp computer science bibliography, https://dblp.org}
+}
 ```
