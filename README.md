@@ -34,7 +34,7 @@ Details of dataset construction see [Data Construction](./dataset_construct/READ
 
 You can find the dataset as following Google Drive links.
 
-Dataset [[Google Drive]]()
+Dataset [ACE05](https://drive.google.com/file/d/14ESd_mjx8PG6E7ls3bxWYuNiPhYWBqlJ/view?usp=sharing)、[Few-NERD](https://drive.google.com/file/d/1K6ZZoJj_FofdqZSLgE6mlHHS3bLWM90Z/view?usp=sharing)、[NYT](https://drive.google.com/file/d/1_x8efbnt5ljaAtUIlqi3T_AVT3nZqoKT/view?usp=sharing)
 
 # How to run
 
