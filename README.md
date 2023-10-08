@@ -1,6 +1,6 @@
 # AdaKGC
 
-Code for the EMNLP2023 (Findings) paper [`Schema-adaptable Knowledge Graph Construction`](https://arxiv.org/abs/2305.08703).
+Code for the paper [`Schema-adaptable Knowledge Graph Construction`](https://arxiv.org/abs/2305.08703).
 
 # Quick Links
 
