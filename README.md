@@ -1,7 +1,6 @@
 
 <h1 align="center"> <p> 🎇AdaKGC </p>
-</h1> 
-
+</h1>
 
 <div align="center">
      
@@ -10,8 +9,6 @@
    ![](https://img.shields.io/github/last-commit/zjunlp/AdaKGC?color=green) 
    ![](https://img.shields.io/badge/PRs-Welcome-red) 
 </div>
-
----
 
 ## *👋 News!*
 
