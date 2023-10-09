@@ -1,7 +1,6 @@
 
-<h1 align="center"> <p> 🎇AdaKGC </p>
+<h1 align="center"> 🎇AdaKGC 
 </h1>
-
 <div align="center">
      
    [![Awesome](https://awesome.re/badge.svg)]() 
