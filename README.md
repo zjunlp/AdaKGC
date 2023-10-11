@@ -1,8 +1,22 @@
-# AdaKGC
 
-Code for the paper [`Schema-adaptable Knowledge Graph Construction`](https://arxiv.org/abs/2305.08703).
+<h1 align="center"> 🎇AdaKGC 
+</h1>
+<div align="center">
+     
+   [![Awesome](https://awesome.re/badge.svg)]() 
+   [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](https://opensource.org/licenses/MIT)
+   ![](https://img.shields.io/github/last-commit/zjunlp/AdaKGC?color=green) 
+   ![](https://img.shields.io/badge/PRs-Welcome-red) 
+</div>
 
-# Quick Links
+## *👋 News!*
+
+- Code for the paper [`Schema-adaptable Knowledge Graph Construction`](https://arxiv.org/abs/2305.08703).
+
+- Congratulations! Our work has been accepted by the EMNLP2023 Findings conference.
+
+
+## 🎉 Quick Links
 
 * [Requirements](#requirements)
 * [Datasets of Extraction Tasks](#datasets-of-extraction-tasks)
@@ -13,7 +27,7 @@ Code for the paper [`Schema-adaptable Knowledge Graph Construction`](https://arx
 * [Inference](#inference)
 * [Acknowledgment](#acknowledgment)
 
-# Requirements
+## 🎈 Requirements
 
 <a id="requirements"></a>
 
@@ -26,7 +40,7 @@ pip install -r requirements.txt
 
 ```
 
-# Datasets of Extraction Tasks
+## 🎏 Datasets of Extraction Tasks
 
 <a id="datasets-of-extraction-tasks"></a>
 
@@ -36,7 +50,7 @@ You can find the dataset as following Google Drive links.
 
 Dataset [ACE05](https://drive.google.com/file/d/14ESd_mjx8PG6E7ls3bxWYuNiPhYWBqlJ/view?usp=sharing)、[Few-NERD](https://drive.google.com/file/d/1K6ZZoJj_FofdqZSLgE6mlHHS3bLWM90Z/view?usp=sharing)、[NYT](https://drive.google.com/file/d/1_x8efbnt5ljaAtUIlqi3T_AVT3nZqoKT/view?usp=sharing)
 
-# How to run
+## ⚾ How to run
 
 <a id="how-to-run"></a>
 
@@ -50,7 +64,7 @@ cd ..
 mkdir output           # */AdaKGC/output
 ```
 
-+ ## Named Entity Recognition Task
++ ### Named Entity Recognition Task
 
   <a id="ner"></a>
 
@@ -75,7 +89,7 @@ bash scripts/run_finetune.bash --model=hf_models/t5-v1_1-base --data=data/Few-NE
 
 (see bash scripts and Python files for the detailed command-line arguments)
 
-+ ## Relation Extraction Task
++ ### Relation Extraction Task
 
   <a id="re"></a>
 
@@ -84,7 +98,7 @@ bash scripts/run_finetune.bash --model=hf_models/t5-v1_1-base --data=data/Few-NE
 bash scripts/run_finetune.bash --model=hf_models/t5-v1_1-base --data=data/NYT_H/iter_1 --output=output/NYT --mode=H --device=0 --batch=16
 ```
 
-+ ## Event Extraction Task
++ ### Event Extraction Task
 
   <a id="ee"></a>
 
@@ -93,7 +107,7 @@ bash scripts/run_finetune.bash --model=hf_models/t5-v1_1-base --data=data/NYT_H/
 bash scripts/run_finetune.bash --model=hf_models/t5-v1_1-base --data=data/ace05_event_H/iter_1 --output=output/ace05_event --mode=H --device=0 --batch=16
 ```
 
-# Inference
+## 🎰 Inference
 
 <a id="inference"></a>
 
@@ -140,13 +154,13 @@ CUDA_VISIBLE_DEVICES=${device} python3 eval/inference_mul.py --dataname=${datase
 | evt-trigger-(P/R/F1) | Micro-F1 of Event Trigger (Event Type, Trigger Span)                                    |
 | evt-role-(P/R/F1)    | Micro-F1 of Event Argument (Event Type, Arg Role, Arg Span)                             |
 
-# Acknowledgment
+## 🏳‍🌈 Acknowledgment
 
 <a id="acknowledgment"></a>
 
 Part of our code is borrowed from [UIE](https://github.com/universal-ie/UIE) and [UnifiedSKG](https://github.com/hkunlp/unifiedskg), many thanks.
 
-# Papers for the Project & How to Cite
+## 🚩 Papers for the Project & How to Cite
 
 If you use or extend our work, please cite the paper as follows:
 
