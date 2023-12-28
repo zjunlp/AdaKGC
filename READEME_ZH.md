@@ -77,11 +77,17 @@ bash scripts/run_finetune.bash --model=hf_models/t5-v1_1-base --data=data/Few-NE
 ```
 
 `model`: 预训练的模型的名称或路径。
+
 `data`: 数据集的路径。
+
 `output`: 保存的微调检查点的路径，最终自动生成的输出路径`AdaKGC/output/ace05_event_H_e30_lr1e-4_b14_n0。
+
 `mode`: 数据集模式（`H`、`V`、`M`或`R`）。
+
 `device`: CUDA_VISIBLE_DEVICES。
+
 `batch`: batch size。
+
 （有关详细的命令行参数，请参阅bash脚本和Python文件）
 
 
@@ -118,11 +124,17 @@ CUDA_VISIBLE_DEVICES=0 python3 eval/inference.py --dataname=data/ace05_event_H/i
 ```
 
 `datasetname`: 要预测的数据集的路径(`ace05_event`、`NYT` or `Few-NERD`)。
+
 `model`: 前面训练后得到的模型的路径(训练阶段的output)。
+
 `t5_path`: 基座模型T5(训练阶段的model)。
+
 `task`: 任务类型(entity、relation、event)。
+
 `cuda`: CUDA_VISIBLE_DEVICES。
+
 `mode`: 数据集模式（`H`、`V`、`M`或`R`）。
+
 `use_ssi`、`use_task`、`use_prompt`、`prompt_len`、`prompt_dim`需要跟训练时保持一致。
 
 
@@ -149,14 +161,18 @@ CUDA_VISIBLE_DEVICES=${device} python3 eval/inference_mul.py --dataname=${datase
 CUDA_VISIBLE_DEVICES=${device} python3 eval/inference_mul.py --dataname=${dataset_name} --t5_model=hf_models/t5-v1_1-base --model=${output_name} --task=${task} --mode=${mode} --use_ssi=${use_ssi} --use_task=${use_task} --use_prompt=${use_prompt} --prompt_len=${prompt_len} --prompt_dim=${prompt_dim}
 ```
 
-| Metric               | Definition                                                                              | F1      |
-| -------------------- | --------------------------------------------------------------------------------------- |-------|
-| ent-(P/R/F1)         | Micro-F1 of Entity (Entity Type, Entity Span)                                           | spot-F1      |
-| rel-strict-(P/R/F1)  | Micro-F1 of Relation Strict (Relation Type, Arg1 Span, Arg1 Type, Arg2 Span, Arg2 Type) | asoc-F1 for relation、spot-F1 for entity     |
-| evt-trigger-(P/R/F1) | Micro-F1 of Event Trigger (Event Type, Trigger Span)                                    | spot-F1      |
-| evt-role-(P/R/F1)    | Micro-F1 of Event Argument (Event Type, Arg Role, Arg Span)                             | asoc-F1      |
 
-overall-F1 refer to the sum of spot-F1 and asoc-F1, which may over 100.
+
+| 指标                   | 定义                                                                                      | F1        |
+| --------------------- | ---------------------------------------------------------------------------------------- | --------- |
+| ent-(P/R/F1)          | 实体的Micro-F1分数(Entity Type, Entity Span)                                                       | spot-F1   |
+| rel-strict-(P/R/F1)   | 关系严格模式的Micro-F1分数(Relation Type, Arg1 Span, Arg1 Type, Arg2 Span, Arg2 Type) | asoc-F1 用于关系，spot-F1 用于实体 |
+| evt-trigger-(P/R/F1)  | 事件触发词的Micro-F1分数(Event Type, Trigger Span)                                                 | spot-F1   |
+| evt-role-(P/R/F1)     | 事件角色的Micro-F1分数 (Event Type, Arg Role, Arg Span)                                            | asoc-F1   |
+
+overall-F1指的是 spot-F1 和 asoc-F1 的总和，可能超100。                                             
+
+
 
 ## 🏳‍🌈 Acknowledgment
 
