@@ -65,7 +65,7 @@ class HuggingfacePromptPredictor:
     def __init__(self, args) -> None:
         self._tokenizer = T5TokenizerFast.from_pretrained(args.model)
         self._device = f"cuda" if torch.cuda.is_available() else "cpu"
-        self._model = T5Prompt(self._tokenizer, f'{cwd}/hf_models/mix', args).to(self._device)
+        self._model = T5Prompt(self._tokenizer, args.t5_path, args).to(self._device)
         self._model.load_state_dict(torch.load(os.path.join(args.model, 'pytorch_model.bin'), map_location=self._device))
         self._model.eval()
         self._max_source_length = args.max_source_length
@@ -178,6 +178,7 @@ def main():
     parser.add_argument('--task', default='relation', type=str)
     parser.add_argument('--mode', default='H', type=str)
     parser.add_argument('--cuda', default='0')
+    parser.add_argument('--t5_path', default='hf_models/t5-v1_1-base', type=str)
 
     parser.add_argument('--max_source_length', default=256, type=int)
     parser.add_argument('--max_target_length', default=192, type=int)

@@ -180,7 +180,7 @@ def main():
     parser.add_argument('--iter_num', default=7, type=int)
     parser.add_argument('--mode', default='H', type=str)
     parser.add_argument('--cuda', default='0')
-    parser.add_argument('--t5_path', default='hf_models/mix', type=str)
+    parser.add_argument('--t5_path', default='hf_models/t5-v1_1-base', type=str)
 
     parser.add_argument('--max_source_length', default=256, type=int)
     parser.add_argument('--max_target_length', default=192, type=int)
