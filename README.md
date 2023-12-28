@@ -153,6 +153,7 @@ CUDA_VISIBLE_DEVICES=${device} python3 eval/inference_mul.py --dataname=${datase
 | rel-strict-(P/R/F1)  | Micro-F1 of Relation Strict (Relation Type, Arg1 Span, Arg1 Type, Arg2 Span, Arg2 Type) | asoc-F1 for relation、spot-F1 for entity     |
 | evt-trigger-(P/R/F1) | Micro-F1 of Event Trigger (Event Type, Trigger Span)                                    | spot-F1      |
 | evt-role-(P/R/F1)    | Micro-F1 of Event Argument (Event Type, Arg Role, Arg Span)                             | asoc-F1      |
+
 overall-F1 refer to the sum of spot-F1 and asoc-F1, which may over 100.
 
 ## 🏳‍🌈 Acknowledgment
