@@ -18,14 +18,14 @@
 
 ## 🎉 Quick Links
 
-* [Requirements](#requirements)
-* [Datasets of Extraction Tasks](#datasets-of-extraction-tasks)
-* [How to run](#how-to-run)
-  * [Named Entity Recognition Task](#ner)
-  * [Relation Extraction Task](#re)
-  * [Event Extraction Task](#ee)
-* [Inference](#inference)
-* [Acknowledgment](#acknowledgment)
+- [*👋 News!*](#-news)
+- [🎉 Quick Links](#-quick-links)
+- [🎈 Requirements](#-requirements)
+- [🎏 Datasets of Extraction Tasks](#-datasets-of-extraction-tasks)
+- [⚾ How to run](#-how-to-run)
+- [🎰 Inference](#-inference)
+- [🏳‍🌈 Acknowledgment](#-acknowledgment)
+- [🚩 Papers for the Project \& How to Cite](#-papers-for-the-project--how-to-cite)
 
 ## 🎈 Requirements
 
@@ -115,7 +115,7 @@ bash scripts/run_finetune.bash --model=hf_models/t5-v1_1-base --data=data/ace05_
 
 ```bash
 . config/prompt_conf/ace05_event_H.ini
-CUDA_VISIBLE_DEVICES=0 python3 eval/inference.py --dataname=data/ace05_event_H/iter_1 --model=output/ace05_event_H_e30_lr1e-4_b16_n0.8_prompt_80_512 --task=event --cuda=0 --mode=H --use_ssi=${use_ssi} --use_task=${use_task} --use_prompt=${use_prompt} --prompt_len=${prompt_len} --prompt_dim=${prompt_dim}
+CUDA_VISIBLE_DEVICES=0 python3 eval/inference.py --dataname=data/ace05_event_H/iter_1 --model=output/ace05_event_H_e30_lr1e-4_b16_n0.8_prompt_80_512 --t5_path=hf_models/t5-v1_1-base --task=event --cuda=0 --mode=H --use_ssi=${use_ssi} --use_task=${use_task} --use_prompt=${use_prompt} --prompt_len=${prompt_len} --prompt_dim=${prompt_dim}
 
 ```
 
@@ -125,7 +125,7 @@ CUDA_VISIBLE_DEVICES=0 python3 eval/inference.py --dataname=data/ace05_event_H/i
 
 ```bash
 . config/prompt_conf/ace05_event_H.ini
-CUDA_VISIBLE_DEVICES=0 python3 eval/inference_mul.py --dataname=ace05_event --model=output/ace05_event_H_e30_lr1e-4_b16_n0.8_prompt_80_512 --task=event --cuda=0 --mode=H --use_ssi=${use_ssi} --use_task=${use_task} --use_prompt=${use_prompt} --prompt_len=${prompt_len} --prompt_dim=${prompt_dim}
+CUDA_VISIBLE_DEVICES=0 python3 eval/inference_mul.py --dataname=ace05_event --model=output/ace05_event_H_e30_lr1e-4_b16_n0.8_prompt_80_512 --t5_path=hf_models/t5-v1_1-base --task=event --cuda=0 --mode=H --use_ssi=${use_ssi} --use_task=${use_task} --use_prompt=${use_prompt} --prompt_len=${prompt_len} --prompt_dim=${prompt_dim}
 
 ```
 
@@ -141,8 +141,8 @@ device=0
 output_name=ace05_event_H_e30_lr1e-4_b16_n0.8_prompt_80_512
 . config/prompt_conf/${dataset_name}_${mode}.ini 
 bash scripts/run_finetune.bash --model=hf_models/mix --data=data/${dataset_name}_${mode}/iter_1 --output=output/${dataset_name} --mode=${mode} --device=${device} 
-CUDA_VISIBLE_DEVICES=${device} python3 eval/inference_mul.py --dataname=${dataset_name} --model=${output_name} --task=${task} --mode=${mode} --use_ssi=${use_ssi} --use_task=${use_task} --use_prompt=${use_prompt} --prompt_len=${prompt_len} --prompt_dim=${prompt_dim}
-CUDA_VISIBLE_DEVICES=${device} python3 eval/inference_mul.py --dataname=${dataset_name} --model=${output_name} --task=${task} --mode=${mode} --CD --use_ssi=${use_ssi} --use_task=${use_task} --use_prompt=${use_prompt} --prompt_len=${prompt_len} --prompt_dim=${prompt_dim}
+CUDA_VISIBLE_DEVICES=${device} python3 eval/inference_mul.py --dataname=${dataset_name} --t5_path=hf_models/t5-v1_1-base --model=${output_name} --task=${task} --mode=${mode} --use_ssi=${use_ssi} --use_task=${use_task} --use_prompt=${use_prompt} --prompt_len=${prompt_len} --prompt_dim=${prompt_dim}
+CUDA_VISIBLE_DEVICES=${device} python3 eval/inference_mul.py --dataname=${dataset_name} --t5_path=hf_models/t5-v1_1-base --model=${output_name} --task=${task} --mode=${mode} --CD --use_ssi=${use_ssi} --use_task=${use_task} --use_prompt=${use_prompt} --prompt_len=${prompt_len} --prompt_dim=${prompt_dim}
 
 
 ```
