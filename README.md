@@ -39,7 +39,9 @@ pip install torch==1.8.0+cu111 -f https://download.pytorch.org/whl/torch_stable.
 pip install -r requirements.txt
 
 ```
+## 🪄 模型
 
+我们的模型tokenizer部分采用了UIE, 其他部分采用t5, 因此是个混合文件, 这里提供了下载链接, 请确保使用这个模型。 [hf_models/mix](https://drive.google.com/file/d/1CI66LlwTWI3qCUCh6InutmrcTxCRrFiK/view?usp=sharing)
 
 
 ## 🎏 数据集
@@ -72,8 +74,13 @@ mkdir output           # */AdaKGC/output
 
 ```bash
 # Current path:  */AdaKGC
-. config/prompt_conf/Few-NERD_H.ini    # Load predefined parameters
-bash scripts/run_finetune.bash --model=hf_models/t5-v1_1-base --data=data/Few-NERD_H/iter_1 --output=output/Few-NERD --mode=H --device=0 --batch=16
+mode=H
+data_name=Few-NERD
+task=entity
+device=0
+ratio=0.8
+bash scripts/run_prompt.bash --model=hf_models/mix --data=${data_name}_${mode}/iter_1 --output=${data_name}_${mode}_${ratio} --config=${data_name}.ini --device=${device} --negative_ratio=${ratio} --record2=data/${data_name}_${mode}/iter_7/record.schema
+
 ```
 
 `model`: 预训练的模型的名称或路径。
@@ -98,8 +105,12 @@ bash scripts/run_finetune.bash --model=hf_models/t5-v1_1-base --data=data/Few-NE
   <a id="re"></a>
 
 ```bash
-. config/prompt_conf/NYT_H.ini  
-bash scripts/run_finetune.bash --model=hf_models/t5-v1_1-base --data=data/NYT_H/iter_1 --output=output/NYT --mode=H --device=0 --batch=16
+mode=H
+data_name=NYT_H
+task=relation
+device=0
+ratio=0.8
+bash scripts/run_prompt.bash --model=hf_models/mix --data=${data_name}_${mode}/iter_1 --output=${data_name}_${mode}_${ratio} --config=${data_name}.ini --device=${device} --negative_ratio=${ratio} --record2=data/${data_name}_${mode}/iter_7/record.schema
 ```
 
 + ### 事件抽取任务
@@ -107,8 +118,12 @@ bash scripts/run_finetune.bash --model=hf_models/t5-v1_1-base --data=data/NYT_H/
   <a id="ee"></a>
 
 ```bash
-. config/prompt_conf/ace05_event_H.ini  
-bash scripts/run_finetune.bash --model=hf_models/t5-v1_1-base --data=data/ace05_event_H/iter_1 --output=output/ace05_event --mode=H --device=0 --batch=16
+mode=H
+data_name=ace05_event
+task=event
+device=0
+ratio=0.8
+bash scripts/run_prompt.bash --model=hf_models/mix --data=${data_name}_${mode}/iter_1 --output=${data_name}_${mode}_${ratio} --config=${data_name}.ini --device=${device} --negative_ratio=${ratio} --record2=data/${data_name}_${mode}/iter_7/record.schema
 ```
 
 ## 🎰 推理
@@ -118,9 +133,12 @@ bash scripts/run_finetune.bash --model=hf_models/t5-v1_1-base --data=data/ace05_
 * 仅对单个数据集进行推理（例如`data/ace05_event_H/iter_1`）
 
 ```bash
-. config/prompt_conf/ace05_event_H.ini
-CUDA_VISIBLE_DEVICES=0 python3 eval/inference.py --dataname=data/ace05_event_H/iter_1 --model=output/ace05_event_H_e30_lr1e-4_b16_n0.8_prompt_80_512 --t5_path=hf_models/t5-v1_1-base --task=event --cuda=0 --mode=H --use_ssi=${use_ssi} --use_task=${use_task} --use_prompt=${use_prompt} --prompt_len=${prompt_len} --prompt_dim=${prompt_dim}
-
+mode=V
+data_name=ace05_event
+task=event
+device=0
+ratio=0.8
+python3 inference.py --dataname=${data_name}/${data_name}_${mode}/iter_2 --t5_path=hf_models/mix --model=${data_name}_${mode}_${ratio} --task=${task} --cuda=${device} --mode=${mode} --use_prompt --use_ssi --prompt_len=80 --prompt_dim=800
 ```
 
 `datasetname`: 要预测的数据集的路径(`ace05_event`、`NYT` or `Few-NERD`)。
@@ -135,30 +153,35 @@ CUDA_VISIBLE_DEVICES=0 python3 eval/inference.py --dataname=data/ace05_event_H/i
 
 `mode`: 数据集模式（`H`、`V`、`M`或`R`）。
 
-`use_ssi`、`use_task`、`use_prompt`、`prompt_len`、`prompt_dim`需要跟训练时保持一致。
+`use_ssi`、`use_prompt`、`prompt_len`、`prompt_dim`需要跟训练时保持一致, 可以在对应的配置文件config/prompt_conf/ace05_event.ini中查看并设置。
 
 
 * 在所有迭代数据集上的自动推理（即`data/iter_1/ace05_event_H`~`data/iter _7/ace05_event_H`）
 
 ```bash
-. config/prompt_conf/ace05_event_H.ini
-CUDA_VISIBLE_DEVICES=0 python3 eval/inference_mul.py --dataname=ace05_event --model=output/ace05_event_H_e30_lr1e-4_b16_n0.8_prompt_80_512 --t5_path=hf_models/t5-v1_1-base --task=event --cuda=0 --mode=H --use_ssi=${use_ssi} --use_task=${use_task} --use_prompt=${use_prompt} --prompt_len=${prompt_len} --prompt_dim=${prompt_dim}
-
+mode=H
+data_name=ace05_event
+task=event
+device=0
+ratio=0.8
+python3 inference_mul.py --dataname=${data_name} --t5_path=hf_models/mix --model=${data_name}_${mode}_${ratio} --task=${task} --cuda=${device} --mode=${mode} --use_prompt --use_ssi --prompt_len=80 --prompt_dim=512
 ```
+`use_ssi`、`use_prompt`、`prompt_len`、`prompt_dim`需要跟训练时保持一致。
+
+
 
 
 完整的过程，包括微调和推理（在"scripts/run.bash"中）：
 
 ```bash
 mode=H
-dataset_name=ace05_event
+data_name=ace05_event
 task=event
 device=0
-output_name=ace05_event_H_e30_lr1e-4_b16_n0.8_prompt_80_512
-. config/prompt_conf/${dataset_name}_${mode}.ini 
-bash scripts/run_finetune.bash --model=hf_models/t5-v1_1-base --data=data/${dataset_name}_${mode}/iter_1 --output=output/${dataset_name} --mode=${mode} --device=${device} 
-CUDA_VISIBLE_DEVICES=${device} python3 eval/inference_mul.py --dataname=${dataset_name} --t5_path=hf_models/t5-v1_1-base --model=${output_name} --task=${task} --mode=${mode} --use_ssi=${use_ssi} --use_task=${use_task} --use_prompt=${use_prompt} --prompt_len=${prompt_len} --prompt_dim=${prompt_dim}
-CUDA_VISIBLE_DEVICES=${device} python3 eval/inference_mul.py --dataname=${dataset_name} --t5_path=hf_models/t5-v1_1-base --model=${output_name} --task=${task} --mode=${mode} --use_ssi=${use_ssi} --use_task=${use_task} --use_prompt=${use_prompt} --prompt_len=${prompt_len} --prompt_dim=${prompt_dim}
+ratio=0.8
+bash scripts/run_prompt.bash --model=hf_models/mix --data=${data_name}_${mode}/iter_1 --output=${data_name}_${mode}_${ratio} --config=${data_name}.ini --device=${device} --negative_ratio=${ratio} --record2=data/${data_name}_${mode}/iter_7/record.schema
+python3 inference_mul.py --dataname=${task}/${data_name} --t5_path=hf_models/mix --model=${data_name}_${mode}_${ratio} --task=${task} --cuda=${device} --mode=${mode} --use_prompt --use_ssi --prompt_len=80 --prompt_dim=800
+python3 inference_mul.py --dataname=${task}/${data_name} --t5_path=hf_models/mix --model=${data_name}_${mode}_${ratio} --task=${task} --cuda=${device} --mode=${mode} --CD --use_prompt --use_ssi --prompt_len=80 --prompt_dim=800
 ```
 
 
