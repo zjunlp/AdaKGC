@@ -30,8 +30,8 @@ export record2=0
 
 
 export model_name="hf_models/t5-v1_1-base"
-export data_name="relation/NYT"
-export output_dir="output/relation_NYT"
+export data_name="data/NYT/NYT_H"
+export output_dir="output/NYT_H"
 export config="base_model_conf_nyt.ini"
 
 
