@@ -123,62 +123,6 @@ class HuggingfacePromptPredictor:
 
 
 
-
-class HuggingfacePrefixPredictor:
-    def __init__(self, decoding_format = 'spotasoc', source_prefix = '', args = None) -> None:
-        self._tokenizer = T5TokenizerFast.from_pretrained(args.model)
-        logger.info(f"Tokenizer Length: {len(self._tokenizer)}")
-        self._device = f"cuda:{args.cuda}" if torch.cuda.is_available() else "cpu"
-        logger.info(f"Device: {self._device}")
-        self._model = T5Prefix(self._tokenizer, f'{cwd}/hf_models/mix', args).to(self._device)
-        self._model.load_state_dict(torch.load(os.path.join(args.model, 'pytorch_model.bin'), map_location=self._device))
-        '''是这样的, 先初始化__init__(slef/encoder/decoder prompt先随机初始化吧), 再load_state_dict取参数(prompt也取)'''
-        self._model.eval()
-
-        self._max_source_length = args.max_source_length
-        self._max_target_length = args.max_target_length
-        self._args = {"num_beams": args.num_beams, "do_sample": args.do_sample, "top_k": args.top_k, "top_p": args.top_p}
-        self.task_name = args.task
-            
-
-    def load_schema(self, record_file, CD):
-        logger.info(f"record_file: {record_file}")
-        self._schema = RecordSchema.read_from_file(record_file)
-        self._ssi = schema_to_ssi(self._schema)
-        logger.info(f"ssi: {self._ssi}")
-        if CD:
-            self.constraint_decoder = get_constraint_decoder(tokenizer = self._tokenizer,
-                                                             type_schema = self._schema,
-                                                             decoding_schema = 'spotasoc',
-                                                             source_prefix = '',
-                                                             task_name = self.task_name)
-        else:
-            self.constraint_decoder = None
-
-
-    def predict(self, text):
-        func = None
-        def CD_fn(batch_id, sent):
-            src_sentence = inputs['input_ids'][batch_id]
-            return self.constraint_decoder.constraint_decoding(src_sentence = src_sentence, tgt_generated = sent)
-        if self.constraint_decoder is not None:
-            func = CD_fn
-            
-        text = [self._ssi + x for x in text]  
-        inputs = self._tokenizer(text, padding=True, return_tensors='pt').to(self._device)
-        inputs['input_ids'] = inputs['input_ids'][:, :self._max_source_length]
-        inputs['attention_mask'] = inputs['attention_mask'][:, :self._max_source_length] 
-
-        result = self._model.generate(
-            input_ids=inputs['input_ids'],
-            attention_mask=inputs['attention_mask'],
-            prefix_allowed_tokens_fn=func,
-            **self._args
-        )
-        return self._tokenizer.batch_decode(result, skip_special_tokens=False, clean_up_tokenization_spaces=False)
-
-
-
 class HuggingfacePredictor:
     def __init__(self, decoding_format = 'spotasoc', source_prefix = '', args = None) -> None:
         self._tokenizer = T5TokenizerFast.from_pretrained(args.model)
@@ -327,23 +271,20 @@ def main():
 
     if options.use_prompt:
         predictor = HuggingfacePromptPredictor(args=options) 
-    elif options.use_prefix:
-        predictor = HuggingfacePrefixPredictor(args=options) 
     else:
         predictor = HuggingfacePredictor(args=options) 
 
 
 
-    basepath = "data"
     data_folder = []
     for it in range(1, options.iter_num + 1):
-        data_folder.append(f"{options.dataname}_{options.mode}/iter_{it}")
+        data_folder.append(os.path.join(options.dataname, f"/iter_{it}"))
     data_folder = sorted(data_folder, key=lambda x:x)
     print(data_folder)
     
     number_dict = {}
     for data in data_folder:
-        options.data_folder = f'{basepath}/{data}'
+        options.data_folder = data
         model_path = '_'.join(options.model.split('/')[1:]).replace('/', '_')
         if options.num_beams != None:
             model_path += f'_beam{options.num_beams}'
@@ -352,10 +293,11 @@ def main():
                 model_path += f'_topk{options.top_k}'
             if options.top_p != None:
                 model_path += f'_topp{options.top_p}'
-        os.makedirs(f'output_infer/{model_path}', exist_ok = True)
+        os.makedirs(os.path.join('output_infer', model_path), exist_ok = True)
+        
         
         data_dir = data.replace('/', '_')
-        output_dir = f'output_infer/{model_path}/{data_dir}'
+        output_dir = os.path.join('output_infer', model_path, data_dir)
         if options.CD:
             output_dir += '_CD'
         if os.path.exists(output_dir) and os.path.exists(os.path.join(output_dir, 'test_results.txt')):
@@ -363,18 +305,17 @@ def main():
             output_dir += cur_time
         os.makedirs(output_dir, exist_ok = True)
         
-        data = f'{basepath}/{data}'
         logging.basicConfig(
             format="%(message)s",
             datefmt="%m/%d/%Y %H:%M:%S",
-            handlers=[logging.StreamHandler(sys.stdout), logging.FileHandler(output_dir+'/log.txt', mode = 'w', encoding = 'utf-8')],
+            handlers=[logging.StreamHandler(sys.stdout), logging.FileHandler(os.path.join('output_infer', 'log.txt'), mode = 'w', encoding = 'utf-8')],
         )
         logger.setLevel(logging.INFO)
         logger.info(f"config: {vars(options)}")
         logger.info(f"data: {data}")
 
 
-        predictor.load_schema(f"{data}/record.schema", options.CD)   
+        predictor.load_schema(os.path.join('output_infer', 'record.schema'), options.CD)   
         schema_dict = SEL2Record.load_schema_dict(data)
         sel2record = SEL2Record(
             schema_dict=schema_dict,
@@ -384,7 +325,7 @@ def main():
 
 
         for split, split_name in [('test', 'test')]:
-            gold_filename = f"{data}/{split}.json"
+            gold_filename = os.path.join(data, f'{split}.json')
 
             text_list = [x['text'] for x in read_json_file(gold_filename)]
             token_list = [x['tokens'] for x in read_json_file(gold_filename)]

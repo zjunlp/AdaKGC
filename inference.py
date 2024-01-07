@@ -76,7 +76,7 @@ class HuggingfacePromptPredictor:
         '''是这样的, 先初始化__init__(slef/encoder/decoder prompt先随机初始化吧), 再load_state_dict取参数(prompt也取)'''
         self._model.eval()
 
-        self._schema = RecordSchema.read_from_file(f"{args.data_folder}/record.schema")       
+        self._schema = RecordSchema.read_from_file(os.path.join(args.data_folder, "record.schema"))       
         spots, asocs = schema_to_spotasoc(self._schema, self._tokenizer)
         self._ssi = schema_to_ssi(self._schema)
         self._spots = spots
@@ -135,12 +135,12 @@ class HuggingfacePrefixPredictor:
         logger.info(f"Tokenizer Length: {len(self._tokenizer)}")
         self._device = f"cuda:{args.cuda}" if torch.cuda.is_available() else "cpu"
         logger.info(f"Device: {self._device}")
-        self._model = T5Prefix(self._tokenizer, f'{cwd}/hf_models/mix', args).to(self._device)
+        self._model = T5Prefix(self._tokenizer, args.tg_path, args).to(self._device)
         self._model.load_state_dict(torch.load(os.path.join(args.model, 'pytorch_model.bin'), map_location=self._device))
         '''是这样的, 先初始化__init__(slef/encoder/decoder prompt先随机初始化吧), 再load_state_dict取参数(prompt也取)'''
         self._model.eval()
 
-        self._schema = RecordSchema.read_from_file(f"{args.data_folder}/record.schema")       
+        self._schema = RecordSchema.read_from_file(os.path.join(args.data_folder, "record.schema"))       
         self._ssi = schema_to_ssi(self._schema)
         logger.info(f"ssi: {self._ssi}")
         self._max_source_length = args.max_source_length
@@ -186,7 +186,7 @@ class HuggingfacePredictor:
         self._tokenizer = T5TokenizerFast.from_pretrained(args.model)
         self._model = T5ForConditionalGeneration.from_pretrained(args.model)
         self._model.cuda(f"cuda:{args.cuda}")
-        self._schema = RecordSchema.read_from_file(f"{args.data_folder}/record.schema")
+        self._schema = RecordSchema.read_from_file(os.path.join(args.data_folder, "record.schema"))
         self._ssi = schema_to_ssi(self._schema)          
         self._purssi = list(set(self._tokenizer.encode(schema_to_purssi(self._schema))))
         self._max_source_length = args.max_source_length
@@ -318,7 +318,7 @@ def main():
         #tgt = [4, 5, 6, 10, 11, 12]
         tgt = [6, 12]
 
-    options.data_folder = f'data/{options.dataname}' 
+    options.data_folder = options.dataname
 
     model_path = '_'.join(options.model.split('/')[1:]).replace('/', '_')
     if options.num_beams != None:
@@ -328,10 +328,11 @@ def main():
             model_path += f'_topk{options.top_k}'
         if options.top_p != None:
             model_path += f'_topp{options.top_p}'
-    os.makedirs(f'output_infer/{model_path}', exist_ok = True)
+    os.makedirs(os.path.join('output_infer', model_path), exist_ok = True)
+    
 
     data_dir = options.dataname.replace('/', '_')
-    output_dir = f'output_infer/{model_path}/{data_dir}'
+    output_dir = os.path.join('output_infer', model_path, data_dir)
     if options.CD:
         output_dir += '_CD'
     if os.path.exists(output_dir) and os.path.exists(os.path.join(output_dir, 'test_results.txt')):
@@ -342,8 +343,9 @@ def main():
     logging.basicConfig(
         format="%(asctime)s - %(funcName)s - %(lineno)d - %(message)s",
         datefmt="%m/%d/%Y %H:%M:%S",
-        handlers=[logging.StreamHandler(sys.stdout), logging.FileHandler(output_dir+'/log.txt', mode = 'w', encoding = 'utf-8')],
+        handlers=[logging.StreamHandler(sys.stdout), logging.FileHandler(os.path.join(output_dir, 'log.txt'), mode = 'w', encoding = 'utf-8')],
     )
+
     logger.setLevel(logging.INFO)
     logger.info(f"config: f{vars(options)}")
     logger.info(f"data: {data_dir}")
@@ -366,7 +368,7 @@ def main():
     )
 
     for split, split_name in [('test', 'test')]:
-        gold_filename = f"{options.data_folder}/{split}.json"
+        gold_filename = os.path.join(options.data_folder, f'{split}.json')
         text_list = [x['text'] for x in read_json_file(gold_filename)]
         token_list = [x['tokens'] for x in read_json_file(gold_filename)]
 

@@ -79,7 +79,7 @@ data_name=Few-NERD
 task=entity
 device=0
 ratio=0.8
-bash scripts/run_prompt.bash --model=hf_models/mix --data=${data_name}_${mode}/iter_1 --output=${data_name}_${mode}_${ratio} --config=${data_name}.ini --device=${device} --negative_ratio=${ratio} --record2=data/${data_name}_${mode}/iter_7/record.schema
+bash scripts/run_prompt.bash --model=hf_models/mix --data=data/${data_name}_${mode}/iter_1 --output=output/${data_name}_${mode}_${ratio} --config=${data_name}.ini --device=${device} --negative_ratio=${ratio} --record2=data/${data_name}_${mode}/iter_7/record.schema
 
 ```
 
@@ -110,7 +110,7 @@ data_name=NYT
 task=relation
 device=0
 ratio=0.8
-bash scripts/run_prompt.bash --model=hf_models/mix --data=${data_name}_${mode}/iter_1 --output=${data_name}_${mode}_${ratio} --config=${data_name}.ini --device=${device} --negative_ratio=${ratio} --record2=data/${data_name}_${mode}/iter_7/record.schema
+bash scripts/run_prompt.bash --model=hf_models/mix --data=data/${data_name}_${mode}/iter_1 --output=output/${data_name}_${mode}_${ratio} --config=${data_name}.ini --device=${device} --negative_ratio=${ratio} --record2=data/${data_name}_${mode}/iter_7/record.schema
 ```
 
 + ### 事件抽取任务
@@ -123,7 +123,7 @@ data_name=ace05_event
 task=event
 device=0
 ratio=0.8
-bash scripts/run_prompt.bash --model=hf_models/mix --data=${data_name}_${mode}/iter_1 --output=${data_name}_${mode}_${ratio} --config=${data_name}.ini --device=${device} --negative_ratio=${ratio} --record2=data/${data_name}_${mode}/iter_7/record.schema
+bash scripts/run_prompt.bash --model=hf_models/mix --data=data/${data_name}_${mode}/iter_1 --output=output/${data_name}_${mode}_${ratio} --config=${data_name}.ini --device=${device} --negative_ratio=${ratio} --record2=data/${data_name}_${mode}/iter_7/record.schema
 ```
 
 ## 🎰 推理
@@ -138,7 +138,7 @@ data_name=ace05_event
 task=event
 device=0
 ratio=0.8
-python3 inference.py --dataname=${data_name}/${data_name}_${mode}/iter_2 --t5_path=hf_models/mix --model=${data_name}_${mode}_${ratio} --task=${task} --cuda=${device} --mode=${mode} --use_prompt --use_ssi --prompt_len=80 --prompt_dim=512
+python3 inference.py --dataname=data/${data_name}/${data_name}_${mode}/iter_2 --t5_path=hf_models/mix --model=output/${data_name}_${mode}_${ratio} --task=${task} --cuda=${device} --mode=${mode} --use_prompt --use_ssi --prompt_len=80 --prompt_dim=512
 ```
 
 `datasetname`: 要预测的数据集的路径(`ace05_event`、`NYT` or `Few-NERD`)。
@@ -164,7 +164,7 @@ data_name=ace05_event
 task=event
 device=0
 ratio=0.8
-python3 inference_mul.py --dataname=${data_name} --t5_path=hf_models/mix --model=${data_name}_${mode}_${ratio} --task=${task} --cuda=${device} --mode=${mode} --use_prompt --use_ssi --prompt_len=80 --prompt_dim=512
+python3 inference_mul.py --dataname=data/${data_name}/${data_name}_${mode} --t5_path=hf_models/mix --model=output/${data_name}_${mode}_${ratio} --task=${task} --cuda=${device} --mode=${mode} --use_prompt --use_ssi --prompt_len=80 --prompt_dim=512
 ```
 `use_ssi`、`use_prompt`、`prompt_len`、`prompt_dim`需要跟训练时保持一致。
 
@@ -179,9 +179,8 @@ data_name=ace05_event
 task=event
 device=0
 ratio=0.8
-bash scripts/run_prompt.bash --model=hf_models/mix --data=${data_name}_${mode}/iter_1 --output=${data_name}_${mode}_${ratio} --config=${data_name}.ini --device=${device} --negative_ratio=${ratio} --record2=data/${data_name}_${mode}/iter_7/record.schema
-python3 inference_mul.py --dataname=${task}/${data_name} --t5_path=hf_models/mix --model=${data_name}_${mode}_${ratio} --task=${task} --cuda=${device} --mode=${mode} --use_prompt --use_ssi --prompt_len=80 --prompt_dim=512
-python3 inference_mul.py --dataname=${task}/${data_name} --t5_path=hf_models/mix --model=${data_name}_${mode}_${ratio} --task=${task} --cuda=${device} --mode=${mode} --CD --use_prompt --use_ssi --prompt_len=80 --prompt_dim=512
+bash scripts/run_prompt.bash --model=hf_models/mix --data=data/${data_name}_${mode}/iter_1 --output=output/${data_name}_${mode}_${ratio} --config=${data_name}.ini --device=${device} --negative_ratio=${ratio} --record2=data/${data_name}_${mode}/iter_7/record.schema
+python3 inference_mul.py --dataname=data/${data_name}/${data_name}_${mode} --t5_path=hf_models/mix --model=output/${data_name}_${mode}_${ratio} --task=${task} --cuda=${device} --mode=${mode} --use_prompt --use_ssi --prompt_len=80 --prompt_dim=512
 ```
 
 

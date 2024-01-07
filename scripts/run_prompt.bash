@@ -275,8 +275,8 @@ else
 fi
 
 
-data_folder=data/${data_name}
-output_dir="output/${output_name}"
+data_folder=${data_name}
+output_dir=${output_name}
 
 if [[ ${record2} == 0 ]]
 then
