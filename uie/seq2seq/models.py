@@ -272,7 +272,7 @@ class T5Prompt(nn.Module):
     
 
     def get_input_tokens(self, bsz, spots, asocs):
-        input_tokens = self.prompt_inputs.unsqueeze(0).expand(bsz, -1).to(self.t5.device)
+        input_tokens = self.prompt_inputs.unsqueeze(0).expand(bsz, -1).clone().to(self.t5.device)
         spots_len = len(spots[0])
 
         input_tokens[:, 0] = 1
