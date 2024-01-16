@@ -43,6 +43,8 @@ pip install -r requirements.txt
 
 我们的模型tokenizer部分采用了UIE, 其他部分采用t5, 因此是个混合文件, 这里提供了下载链接, 请确保使用这个模型。 [hf_models/mix](https://drive.google.com/file/d/1CI66LlwTWI3qCUCh6InutmrcTxCRrFiK/view?usp=sharing)
 
+训练代码中涉及到的[glove.6B](https://nlp.stanford.edu/data/glove.6B.zip)
+
 
 ## 🎏 数据集
 
