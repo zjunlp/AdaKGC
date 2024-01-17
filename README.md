@@ -61,12 +61,6 @@ Dataset [ACE05](https://drive.google.com/file/d/14ESd_mjx8PG6E7ls3bxWYuNiPhYWBql
 <a id="how-to-run"></a>
 
 ```python
-mkdir hf_models
-cd hf_models
-git lfs install
-git clone https://huggingface.co/google/t5-v1_1-base
-cd ..
-
 mkdir output           # */AdaKGC/output
 ```
 
