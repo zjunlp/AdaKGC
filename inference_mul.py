@@ -17,14 +17,13 @@ from transformers import T5TokenizerFast, T5ForConditionalGeneration
 
 
 from uie.seq2seq.constraint_decoder import get_constraint_decoder
-from uie.seq2seq.models import T5Prompt, T5Prefix
+from uie.seq2seq.models import T5Prompt
 
 from uie.sel2record.record import MapConfig
 from uie.sel2record.sel2record import SEL2Record
 
 from uie.extraction.scorer import *
 from uie.extraction.record_schema import RecordSchema
-from uie.extraction.constants import type_start, type_end, span_start, null_span
 
 
 logger = logging.getLogger(__name__)
@@ -43,7 +42,6 @@ def schema_to_ssi(schema: RecordSchema):
     ssi += "<asoc> " + " <asoc> ".join(sorted(schema.role_list))
     ssi += " <extra_id_2> "
     return ssi
-
 
 
 def post_processing(x):

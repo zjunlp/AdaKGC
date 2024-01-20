@@ -484,15 +484,18 @@ class PromptForMetaSeq2Seq:
                 logger.info(f"feature['input_ids']: {self.tokenizer.convert_ids_to_tokens(feature['input_ids'])}")   # feature['input_ids']: Parts of the Pennsylvania Turnpike were closed ; so too was the Baseball Hall of Fame and Museum in Cooperstown, N.Y. Then there was the house that was spotted drifting down the Susquehanna River in New York -- on fire for a while, it seemed. "</s>
                 logger.info(f"feature['labels']: {self.tokenizer.convert_ids_to_tokens(feature['labels'])}")         # feature['labels']: <extra_id_0><extra_id_0> location<extra_id_5> Cooperstown<extra_id_1><extra_id_0> location<extra_id_5> Susquehanna River<extra_id_1><extra_id_0> location<extra_id_5> New York<extra_id_0> contains<extra_id_5> Cooperstown<extra_id_1><extra_id_0> contains<extra_id_5> Susquehanna River<extra_id_1><extra_id_1><extra_id_1></s>
 
+            '''评估(test)所有的spot、asoc都要用到, 不存在正负样本'''
             if not sample_prompt:
-                # Evaluation using Ordered SSI
                 spot_prefix, convert_spot = self.negative_sampler.full_spot(shuffle=self.model.training)
                 asoc_prefix, convert_asoc = self.negative_sampler.full_asoc(shuffle=self.model.training)
             else:
-                # Sample SSI，采样negtive shema
+                '''
+                获得正样本(positive_spot)和负样本(negative_spot), 
+                spot_prefix是正spot+负spot,
+                convert_spot是在每个spot之间添加了特殊分隔符(<spot>)
+                '''
                 spot_prefix, convert_spot, positive_spot, negative_spot = self.negative_sampler.sample_spot(positive=feature.get('spots', []))
                 asoc_prefix, convert_asoc, positive_asoc, negative_asoc = self.negative_sampler.sample_asoc(positive=feature.get('asocs', []))
-                # 传入的 positive=feature.get('asocs'/'spots')是该feature的真实label
                 if self.count > 0:
                     logger.info(f"Spot_Prefix: {spot_prefix}") 
                     logger.info(f"Asoc_Prefix: {asoc_prefix}") 
@@ -500,6 +503,15 @@ class PromptForMetaSeq2Seq:
                     logger.info(f"Positive_Asoc Len: {len(positive_asoc)} \t {positive_asoc}")
                     logger.info(f"Negative_Spot Len: {len(negative_spot)} \t {negative_spot}")  
                     logger.info(f"Negative_Asoc Len: {len(negative_asoc)} \t {negative_asoc}")
+                '''
+                feature['input_ids']: ['▁So', '▁to', '▁me', '▁', ',', '▁the', '▁key', '▁thing', '▁is', '▁that', '▁we', '▁ought', '▁to', '▁be', '▁taking', '▁care', '▁of', '▁the', '▁military', '▁and', '▁that', '▁', "'", '▁', 's', '▁what', '▁we', '▁should', '▁do', '▁', '.', '</s>']
+                feature['labels']: ['<extra_id_0>', '<extra_id_1>', '</s>']
+                Positive_Spot Len: 0 	 []
+                Positive_Asoc Len: 0 	 []
+                Negative_Spot Len: 12 	 ['sentence', 'marry', 'phone write', 'sue', 'be born', 'acquit', 'elect', 'transfer ownership', 'attack', 'extradite', 'end organization', 'arrest jail']
+                Negative_Asoc Len: 19 	 ['adjudicator', 'beneficiary', 'place', 'instrument', 'destination', 'organization', 'buyer', 'plaintiff', 'defendant', 'target', 'victim', 'artifact', 'person', 'attacker', 'entity', 'seller', 'agent', 'origin', 'vehicle']
+                上面的数据中可以看到label中的正样本数是0, 负采样后得到12、19个负样本
+                '''
 
                 # Dynamic generating spot-asoc during training，evaluating时也有
                 if 'spot_asoc' in feature:
@@ -524,12 +536,19 @@ class PromptForMetaSeq2Seq:
                     feature["labels"] = self.tokenizer.encode(record)
 
                     if self.count > 0:
-                        logger.info(f"Record: {record}")   # Record: <extra_id_0> <extra_id_0> organization <extra_id_5> <extra_id_6> <extra_id_1> <extra_id_0> location <extra_id_5> Cooperstown <extra_id_1> <extra_id_0> location <extra_id_5> Susquehanna River <extra_id_1> <extra_id_0> location <extra_id_5> New York <extra_id_0> contains <extra_id_5> Cooperstown <extra_id_1> <extra_id_0> contains <extra_id_5> Susquehanna River <extra_id_1> <extra_id_1> <extra_id_1>
-                        logger.info(f"feature['labels']: {self.tokenizer.convert_ids_to_tokens(feature['labels'])}")   # 同Record不过是encode后的
+                        logger.info(f"Record: {record}")   
+                        logger.info(f"feature['labels']: {self.tokenizer.convert_ids_to_tokens(feature['labels'])}")  
 
 
             feature.pop('sample_prompt') if 'sample_prompt' in feature else None
             feature.pop('spot_asoc') if 'spot_asoc' in feature else None
+            '''
+            spot、asoc由原先的正样本变为负采样后的正加负
+            "spot": ["geographical social political"], 
+            采样两个负样本"person other", "writtenart"
+            最终得到"spot": ["geographical social political", "person other", "writtenart"], 
+            feature['spot']、feature['asoc']在获得prompt的时候用到
+            '''
             feature['spot'] = [self.tokenizer.encode(s, add_special_tokens = False) for s in spot_prefix]
             feature['asoc'] = [self.tokenizer.encode(a, add_special_tokens = False) for a in asoc_prefix]
 
@@ -537,13 +556,16 @@ class PromptForMetaSeq2Seq:
                 prefix = convert_spot + convert_asoc
                 if self.max_prefix_length is not None and self.max_prefix_length >= 0:
                     prefix = prefix[:self.max_prefix_length]
-
                 feature['input_ids'] = prefix + [self.negative_sampler.text_start] + feature['input_ids']  # <text>分隔符
-
                 if self.count > 0:
                     logger.info(f"Prefix: {self.tokenizer.convert_ids_to_tokens(prefix)}")     # <spot> organization<spot> location<spot> person<asoc> major shareholder of<asoc> people<asoc> profession<asoc> children<asoc> place of death<asoc> advisors<asoc> teams<asoc> contains<asoc> industry<asoc> place founded
                     logger.info(f"feature['input_ids']: {self.tokenizer.convert_ids_to_tokens(feature['input_ids'])}") 
-
+                    '''
+                    Prefix: ['<spot>', '▁', 'a', 'c', 'quit', '<spot>', '▁arrest', '▁jail', '<spot>', '▁attack', '<spot>', '▁be', '▁born', '<spot>', '▁elect', '<spot>', '▁end', '▁organization', '<spot>', '▁extra', 'dite', '<spot>', '▁marry', '<spot>', '▁phone', '▁write', '<spot>', '▁sentence', '<spot>', '▁su', 'e', '<spot>', '▁transfer', '▁ownership', '<asoc>', '▁adj', 'u', 'dic', 'ator', '<asoc>', '▁agent', '<asoc>', '▁art', 'i', 'fact', '<asoc>', '▁attacker', '<asoc>', '▁beneficiary', '<asoc>', '▁buyer', '<asoc>', '▁defendant', '<asoc>', '▁destination', '<asoc>', '▁entity', '<asoc>', '▁instrument', '<asoc>', '▁organization', '<asoc>', '▁origin', '<asoc>', '▁person', '<asoc>', '▁place', '<asoc>', '▁plaintiff', '<asoc>', '▁seller', '<asoc>', '▁target', '<asoc>', '▁vehicle', '<asoc>', '▁victim']
+                    feature['input_ids']: ['<spot>', '▁', 'a', 'c', 'quit', '<spot>', '▁arrest', '▁jail', '<spot>', '▁attack', '<spot>', '▁be', '▁born', '<spot>', '▁elect', '<spot>', '▁end', '▁organization', '<spot>', '▁extra', 'dite', '<spot>', '▁marry', '<spot>', '▁phone', '▁write', '<spot>', '▁sentence', '<spot>', '▁su', 'e', '<spot>', '▁transfer', '▁ownership', '<asoc>', '▁adj', 'u', 'dic', 'ator', '<asoc>', '▁agent', '<asoc>', '▁art', 'i', 'fact', '<asoc>', '▁attacker', '<asoc>', '▁beneficiary', '<asoc>', '▁buyer', '<asoc>', '▁defendant', '<asoc>', '▁destination', '<asoc>', '▁entity', '<asoc>', '▁instrument', '<asoc>', '▁organization', '<asoc>', '▁origin', '<asoc>', '▁person', '<asoc>', '▁place', '<asoc>', '▁plaintiff', '<asoc>', '▁seller', '<asoc>', '▁target', '<asoc>', '▁vehicle', '<asoc>', '▁victim', '<extra_id_2>', '▁So', '▁to', '▁me', '▁', ',', '▁the', '▁key', '▁thing', '▁is', '▁that', '▁we', '▁ought', '▁to', '▁be', '▁taking', '▁care', '▁of', '▁the', '▁military', '▁and', '▁that', '▁', "'", '▁', 's', '▁what', '▁we', '▁should', '▁do', '▁', '.', '</s>']
+                    Prefix是spot、asoc之间添加了特殊分隔符(<spot>、<asoc>)的格式
+                    如果use_ssi==True, 会在模型的输入'input_ids'的前面添加prefix
+                    '''
 
             if self.max_length:
                 feature['input_ids'] = feature['input_ids'][:self.max_length]

@@ -4,23 +4,21 @@ Note: First of all, make sure your current path is **`*/AdaKGC/dataset_construct
 
 # Quick links
 
-* [Obtain Raw Dataset](#obtain-raw-dataset)
-
-  * [Few-NERD](#few-nerd)
-  * [NYT](#nyt)
-  * [ACE05-Evt](#ace05-evt)
-* [Convert Raw Dataset to Iteration Datase](#convert-raw-dataset-to-iteration-dataset)
-
-  * [Details of Dataset Conversion](#details-of-dataset-conversion)
-    * [Example of Dataset Configuration file](#example-of-dataset-configuration-file)
-  * [File Name Format](#file-name-format)
-    * [Schema Hierarchy](#schema-hierarchy)
-    * [Segmentation Mode](#segmentation-mode)
-    * [Iteration change](#iteration-change)
-* [Data Format](#data-format)
-
-  * [Example of instance from ACE05_Event](#example-of-instance-from-ace05-event)
-* [Acknowledgement](#acknowledgement)
+- [Quick links](#quick-links)
+- [Obtain Raw Dataset](#obtain-raw-dataset)
+    - [Few-NERD](#few-nerd)
+    - [NYT](#nyt)
+    - [ACE05-Evt](#ace05-evt)
+- [Convert Raw Dataset to Iteration Dataset](#convert-raw-dataset-to-iteration-dataset)
+  - [Details of Dataset Conversion](#details-of-dataset-conversion)
+      - [Example of Dataset Configuration file](#example-of-dataset-configuration-file)
+  - [File Name Format](#file-name-format)
+      - [Schema Hierarchy](#schema-hierarchy)
+      - [Segmentation Mode](#segmentation-mode)
+      - [Iteration change](#iteration-change)
+- [Data Format](#data-format)
+      - [Example of instance](#example-of-instance)
+- [Acknowledgement](#acknowledgement)
 
 # Obtain Raw Dataset
 
@@ -239,36 +237,71 @@ data/iter_1/NYT_H
 └── val.json
 ```
 
-#### Example of instance from ACE05_Event
+#### Example of instance
 
 `<a id="example-of-instance-from-ace05-event"></a>`
 
 ```json
+ACE2005_Event
 {
-    "text": "Northshore Management , the hedge fund firm accused of stealing millions of dollars in client funds , is now facing actual SEC action .", 
-    "tokens": ["Northshore", "Management", ",", "the", "hedge", "fund", "firm", "accused", "of", "stealing", "millions", "of", "dollars", "in", "client", "funds", ",", "is", "now", "facing", "actual", "SEC", "action", "."], 
+    "text": "She would be the first foreign woman to die in the wave of kidnappings in Iraq .", 
+    "tokens": ["She", "would", "be", "the", "first", "foreign", "woman", "to", "die", "in", "the", "wave", "of", "kidnappings", "in", "Iraq", "."], 
+    "record": "<extra_id_0> <extra_id_0> die <extra_id_5> die <extra_id_0> victim <extra_id_5> woman <extra_id_1> <extra_id_0> place <extra_id_5> Iraq <extra_id_1> <extra_id_1> <extra_id_1>", 
     "entity": [], 
     "relation": [], 
     "event": [
-        {
-            "type": "justice", 
-            "offset": [7], 
-            "text": "accused", 
-            "args": [
-                {
-                    "type": "defendant", 
-                    "offset": [6], 
-                    "text": "firm"
-                }, {
-                    "type": "prosecutor", 
-                    "offset": [21], 
-                    "text": "SEC"
-                }
-            ]
-        }
+        {"type": "die", "offset": [8], "text": "die", "args": [{"type": "victim", "offset": [6], "text": "woman"}, 
+        {"type": "place", "offset": [15], "text": "Iraq"}]}
     ], 
+    "spot": ["die"], 
+    "asoc": ["victim", "place"], 
+    "spot_asoc": [
+        {"span": "die", "label": "die", "asoc": [["victim", "woman"], ["place", "Iraq"]]}
+    ]
 }
 
+
+NYT
+{
+    "text": "Should Turkey face eastward , toward its Muslim neighbors , or westward , toward Europe ?", 
+    "tokens": ["Should", "Turkey", "face", "eastward", ",", "toward", "its", "Muslim", "neighbors", ",", "or", "westward", ",", "toward", "Europe", "?"], 
+    "record": "<extra_id_0> <extra_id_0> location <extra_id_5> Turkey <extra_id_1> <extra_id_0> location <extra_id_5> Europe <extra_id_0> contains <extra_id_5> Turkey <extra_id_1> <extra_id_1> <extra_id_1>", 
+    "entity": [
+        {"type": "location", "offset": [14], "text": "Europe"}, 
+        {"type": "location", "offset": [1], "text": "Turkey"}
+    ], 
+    "relation": [
+        {"type": "contains", "args": [{"type": "location", "offset": [14], "text": "Europe"}, 
+        {"type": "location", "offset": [1], "text": "Turkey"}]}
+    ], 
+    "event": [], 
+    "spot": ["location"], 
+    "asoc": ["contains"], 
+    "spot_asoc": [
+        {"span": "Turkey", "label": "location", "asoc": []}, 
+        {"span": "Europe", "label": "location", "asoc": [["contains", "Turkey"]]}
+    ]
+}
+
+
+Few-NERD
+{
+    "text": "Now Multan is the name of the city in Pakistan .", 
+    "tokens": ["Now", "Multan", "is", "the", "name", "of", "the", "city", "in", "Pakistan", "."], 
+    "record": "<extra_id_0> <extra_id_0> geographical social political <extra_id_5> Multan <extra_id_1> <extra_id_0> geographical social political <extra_id_5> Pakistan <extra_id_1> <extra_id_1>", 
+    "entity": [
+        {"type": "geographical social political", "offset": [9], "text": "Pakistan"}, 
+        {"type": "geographical social political", "offset": [1], "text": "Multan"}
+    ], 
+    "relation": [], 
+    "event": [], 
+    "spot": ["geographical social political"], 
+    "asoc": [], 
+    "spot_asoc": [
+        {"span": "Multan", "label": "geographical social political", "asoc": []}, 
+        {"span": "Pakistan", "label": "geographical social political", "asoc": []}
+    ]
+}
 ```
 
 # Acknowledgement

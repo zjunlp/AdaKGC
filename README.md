@@ -21,6 +21,7 @@
 - [*👋 新闻!*](#-新闻)
 - [🎉 快速链接](#-快速链接)
 - [🎈 环境依赖](#-环境依赖)
+- [🪄 模型](#-模型)
 - [🎏 数据集](#-数据集)
 - [⚾ 运行](#-运行)
 - [🎰 推理](#-推理)
@@ -43,8 +44,6 @@ pip install -r requirements.txt
 
 我们的模型tokenizer部分采用了UIE, 其他部分采用t5, 因此是个混合文件, 这里提供了下载链接, 请确保使用这个模型。 [hf_models/mix](https://drive.google.com/file/d/1CI66LlwTWI3qCUCh6InutmrcTxCRrFiK/view?usp=sharing)
 
-训练代码中涉及到的[glove.6B](https://nlp.stanford.edu/data/glove.6B.zip)
-
 
 ## 🎏 数据集
 
@@ -61,6 +60,12 @@ Dataset [ACE05](https://drive.google.com/file/d/14ESd_mjx8PG6E7ls3bxWYuNiPhYWBql
 <a id="how-to-run"></a>
 
 ```python
+mkdir hf_models
+cd hf_models
+git lfs install
+git clone https://huggingface.co/google/t5-v1_1-base
+cd ..
+
 mkdir output           # */AdaKGC/output
 ```
 
@@ -75,7 +80,7 @@ data_name=Few-NERD
 task=entity
 device=0
 ratio=0.8
-bash scripts/run_prompt.bash --model=hf_models/mix --data=data/${data_name}_${mode}/iter_1 --output=output/${data_name}_${mode}_${ratio} --config=${data_name}.ini --device=${device} --negative_ratio=${ratio} --record2=data/${data_name}_${mode}/iter_7/record.schema
+bash scripts/run_prompt.bash --model=hf_models/mix --data=data/${data_name}_${mode}/iter_1 --output=output/${data_name}_${mode}_${ratio} --config=config/prompt_conf/Few-NERD.ini --device=${device} --negative_ratio=${ratio} --record2=data/${data_name}_${mode}/iter_7/record.schema
 
 ```
 
@@ -84,6 +89,8 @@ bash scripts/run_prompt.bash --model=hf_models/mix --data=data/${data_name}_${mo
 `data`: 数据集的路径。
 
 `output`: 保存的微调检查点的路径，最终自动生成的输出路径`AdaKGC/output/ace05_event_H_e30_lr1e-4_b14_n0。
+
+`config`: 默认配置文件, 在`config/prompt_conf`目录下, 每个任务的配置不同。
 
 `mode`: 数据集模式（`H`、`V`、`M`或`R`）。
 
@@ -106,7 +113,7 @@ data_name=NYT
 task=relation
 device=0
 ratio=0.8
-bash scripts/run_prompt.bash --model=hf_models/mix --data=data/${data_name}_${mode}/iter_1 --output=output/${data_name}_${mode}_${ratio} --config=${data_name}.ini --device=${device} --negative_ratio=${ratio} --record2=data/${data_name}_${mode}/iter_7/record.schema
+bash scripts/run_prompt.bash --model=hf_models/mix --data=data/${data_name}_${mode}/iter_1 --output=output/${data_name}_${mode}_${ratio} --config=config/prompt_conf/NYT.ini --device=${device} --negative_ratio=${ratio} --record2=data/${data_name}_${mode}/iter_7/record.schema
 ```
 
 + ### 事件抽取任务
@@ -119,7 +126,7 @@ data_name=ace05_event
 task=event
 device=0
 ratio=0.8
-bash scripts/run_prompt.bash --model=hf_models/mix --data=data/${data_name}_${mode}/iter_1 --output=output/${data_name}_${mode}_${ratio} --config=${data_name}.ini --device=${device} --negative_ratio=${ratio} --record2=data/${data_name}_${mode}/iter_7/record.schema
+bash scripts/run_prompt.bash --model=hf_models/mix --data=data/${data_name}_${mode}/iter_1 --output=output/${data_name}_${mode}_${ratio} --config=config/prompt_conf/ace05_event.ini --device=${device} --negative_ratio=${ratio} --record2=data/${data_name}_${mode}/iter_7/record.schema
 ```
 
 ## 🎰 推理
@@ -175,7 +182,7 @@ data_name=ace05_event
 task=event
 device=0
 ratio=0.8
-bash scripts/run_prompt.bash --model=hf_models/mix --data=data/${data_name}_${mode}/iter_1 --output=output/${data_name}_${mode}_${ratio} --config=${data_name}.ini --device=${device} --negative_ratio=${ratio} --record2=data/${data_name}_${mode}/iter_7/record.schema
+bash scripts/run_prompt.bash --model=hf_models/mix --data=data/${data_name}_${mode}/iter_1 --output=output/${data_name}_${mode}_${ratio} --config=config/prompt_conf/ace05_event.ini --device=${device} --negative_ratio=${ratio} --record2=data/${data_name}_${mode}/iter_7/record.schema
 python3 inference_mul.py --dataname=data/${data_name}/${data_name}_${mode} --t5_path=hf_models/mix --model=output/${data_name}_${mode}_${ratio} --task=${task} --cuda=${device} --mode=${mode} --use_prompt --use_ssi --prompt_len=80 --prompt_dim=512
 ```
 

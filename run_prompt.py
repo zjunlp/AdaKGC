@@ -14,7 +14,6 @@ from transformers import (
     AutoConfig,
     AutoTokenizer,
     HfArgumentParser,
-    EarlyStoppingCallback,
     default_data_collator,
     set_seed
 )
@@ -25,12 +24,12 @@ from uie.extraction.record_schema import RecordSchema
 from uie.extraction.extraction_metrics import get_extract_metrics
 from uie.extraction.noiser.spot_asoc_noiser import SpotAsocNoiser
 from uie.extraction.dataset_processer import PrefixGenerator
+
 from uie.seq2seq.constrained_seq2seq import ConstraintSeq2SeqTrainingArguments, EMA
 from uie.seq2seq.constrained_seq2seq_prompt import (
     ConstraintSeq2SeqPromptTrainer, 
     ConstraintSeq2SeqPromptSparseTrainer
 )
-
 from uie.seq2seq.data_collator import (
     PromptForMetaSeq2Seq,
     PromptSSIGenerator,
@@ -44,7 +43,12 @@ os.environ["WANDB_DISABLED"] = "true"
 
 logger = logging.getLogger(__name__)
 
+
 def get_negative_samples(l, k):
+    '''
+    prompt中包含现有的spot和asoc(record.schema中存在的), 还预留了一些空间, 
+    剩余的这些空间来自于spot和asoc的相似词
+    '''
     from thefuzz import fuzz
     from gensim.test.utils import datapath, get_tmpfile
     from gensim.models import KeyedVectors
@@ -72,6 +76,7 @@ def get_negative_samples(l, k):
 
 
 def seed_torch(seed=42):
+    '''设置随机种子'''
     seed = int(seed)
     random.seed(seed)
     os.environ['PYTHONHASHSEED'] = str(seed)
@@ -92,7 +97,7 @@ def main():
     else:
         model_args, data_args, training_args, prompt_args = parser.parse_args_into_dataclasses()
 
-    # Detecting last checkpoint.
+    '''检查是否继续训练'''
     last_checkpoint = None
     if os.path.isdir(training_args.output_dir) and training_args.do_train and not training_args.overwrite_output_dir:
         last_checkpoint = get_last_checkpoint(training_args.output_dir)
@@ -107,25 +112,23 @@ def main():
                 "the `--output_dir` or add `--overwrite_output_dir` to train from scratch."
             )
 
-    # Setup logging
-    log_name = training_args.output_dir.split('/')[-1]
+    '''设置logging,既输出到终端,还输出到文件(logging_dir目录下)'''
     os.makedirs(training_args.logging_dir, exist_ok = True)
     logging.basicConfig(
         format="%(asctime)s - %(levelname)s - %(name)s -   %(message)s",
         datefmt="%m/%d/%Y %H:%M:%S",
-        handlers=[logging.StreamHandler(sys.stdout), logging.FileHandler(training_args.logging_dir+f'/{log_name}.txt', mode = 'w', encoding = 'utf-8')],
+        handlers=[
+            logging.StreamHandler(sys.stdout), 
+            logging.FileHandler(
+                os.path.join(training_args.logging_dir, training_args.output_dir.split('/')[-1]+'.txt'),
+                mode = 'w', encoding = 'utf-8'
+            )
+        ],
     )
     logger.setLevel(logging.INFO)
-
     logger.info(f"last_checkpoint: {last_checkpoint}")
-    logger.info("Options:")
-    logger.info(model_args)
-    logger.info(data_args)
-    logger.info(training_args)
-    logger.info(prompt_args)
+    logger.info(f"Options:\n\nmodel_args:{model_args}\n\ndata_args:{data_args}\n\ntraining_args:{training_args}\n\nprompt_args:{prompt_args}")
 
-    cwd = os.getcwd()
-    logger.info(cwd)
 
     # Log on each process the small summary:
     logger.warning(
@@ -136,33 +139,87 @@ def main():
     if is_main_process(training_args.local_rank):
         transformers.utils.logging.set_verbosity_info()
     logger.info("Training/evaluation parameters %s", training_args)
-
     # Set seed before initializing model.
     set_seed(training_args.seed)
     seed_torch(training_args.seed)
 
 
+    '''加载数据集, json格式, uie_json.py数据集加载脚本(来自于UIE)'''
     if data_args.dataset_name is not None:
         datasets = load_dataset(data_args.dataset_name, data_args.dataset_config_name)
     else:
         data_files = {}
         if data_args.train_file is not None:
             data_files["train"] = data_args.train_file
-            extension = data_args.train_file.split(".")[-1]
         if data_args.validation_file is not None:
             data_files["validation"] = data_args.validation_file
-            extension = data_args.validation_file.split(".")[-1]
         if data_args.test_file is not None:
             data_files["test"] = data_args.test_file
-            extension = data_args.test_file.split(".")[-1]
-    logger.info(data_files)  # {'train': 'data/text2spotasoc/absa/14lap/train.json',...
     datasets = load_dataset("uie_json.py", data_files=data_files)
     
-    logger.info(datasets)   # train: Dataset({features: ['text', 'tokens', 'record', 'entity_offsets', 'relation_offsets', 'event_offsets', 'spot', 'asoc', 'spot_asoc', 'entity', 'relation', 'event'],num_rows: 906})
-    logger.info("Load Config: %s" % model_args.config_name if model_args.config_name else model_args.model_name_or_path)
+    logger.info(datasets)   
+    '''
+    ACE2005_Event
+    {
+        "text": "She would be the first foreign woman to die in the wave of kidnappings in Iraq .", 
+        "tokens": ["She", "would", "be", "the", "first", "foreign", "woman", "to", "die", "in", "the", "wave", "of", "kidnappings", "in", "Iraq", "."], 
+        "record": "<extra_id_0> <extra_id_0> die <extra_id_5> die <extra_id_0> victim <extra_id_5> woman <extra_id_1> <extra_id_0> place <extra_id_5> Iraq <extra_id_1> <extra_id_1> <extra_id_1>", 
+        "entity": [], 
+        "relation": [], 
+        "event": [
+            {"type": "die", "offset": [8], "text": "die", "args": [{"type": "victim", "offset": [6], "text": "woman"}, 
+            {"type": "place", "offset": [15], "text": "Iraq"}]}
+        ], 
+        "spot": ["die"], 
+        "asoc": ["victim", "place"], 
+        "spot_asoc": [
+            {"span": "die", "label": "die", "asoc": [["victim", "woman"], ["place", "Iraq"]]}
+        ]
+    }
+    NYT
+    {
+        "text": "Should Turkey face eastward , toward its Muslim neighbors , or westward , toward Europe ?", 
+        "tokens": ["Should", "Turkey", "face", "eastward", ",", "toward", "its", "Muslim", "neighbors", ",", "or", "westward", ",", "toward", "Europe", "?"], 
+        "record": "<extra_id_0> <extra_id_0> location <extra_id_5> Turkey <extra_id_1> <extra_id_0> location <extra_id_5> Europe <extra_id_0> contains <extra_id_5> Turkey <extra_id_1> <extra_id_1> <extra_id_1>", 
+        "entity": [
+            {"type": "location", "offset": [14], "text": "Europe"}, 
+            {"type": "location", "offset": [1], "text": "Turkey"}
+        ], 
+        "relation": [
+            {"type": "contains", "args": [{"type": "location", "offset": [14], "text": "Europe"}, 
+            {"type": "location", "offset": [1], "text": "Turkey"}]}
+        ], 
+        "event": [], 
+        "spot": ["location"], 
+        "asoc": ["contains"], 
+        "spot_asoc": [
+            {"span": "Turkey", "label": "location", "asoc": []}, 
+            {"span": "Europe", "label": "location", "asoc": [["contains", "Turkey"]]}
+        ]
+    }
+    Few-NERD
+    {
+        "text": "Now Multan is the name of the city in Pakistan .", 
+        "tokens": ["Now", "Multan", "is", "the", "name", "of", "the", "city", "in", "Pakistan", "."], 
+        "record": "<extra_id_0> <extra_id_0> geographical social political <extra_id_5> Multan <extra_id_1> <extra_id_0> geographical social political <extra_id_5> Pakistan <extra_id_1> <extra_id_1>", 
+        "entity": [
+            {"type": "geographical social political", "offset": [9], "text": "Pakistan"}, 
+            {"type": "geographical social political", "offset": [1], "text": "Multan"}
+        ], 
+        "relation": [], 
+        "event": [], 
+        "spot": ["geographical social political"], 
+        "asoc": [], 
+        "spot_asoc": [
+            {"span": "Multan", "label": "geographical social political", "asoc": []}, 
+            {"span": "Pakistan", "label": "geographical social political", "asoc": []}
+        ]
+    }
+    '''
 
+    ''' 加载config'''
     config = AutoConfig.from_pretrained(
-        f'{cwd}/hf_models/mix',
+        model_args.model_name_or_path,
         cache_dir=model_args.cache_dir,
         revision=model_args.model_revision,
         use_auth_token=True if model_args.use_auth_token else None,
@@ -170,6 +227,7 @@ def main():
     config.max_length = data_args.max_target_length
 
 
+    '''加载tokenizer'''
     if 'char' in model_args.model_name_or_path:
         tokenizer = T5BertTokenizer.from_pretrained(model_args.model_name_or_path)
     else:
@@ -181,61 +239,67 @@ def main():
             use_auth_token=True if model_args.use_auth_token else None,
         )
 
-
-    to_remove_token_list = list()     # 在postprocess_text中有用到
+    '''需要移除的token, 在postprocess_text中有用到'''
+    to_remove_token_list = list()     
     if tokenizer.bos_token:
         to_remove_token_list += [tokenizer.bos_token]
     if tokenizer.eos_token:
         to_remove_token_list += [tokenizer.eos_token]
     if tokenizer.pad_token:
         to_remove_token_list += [tokenizer.pad_token]
-    logger.info(f"tokenizer.bos_token: {tokenizer.bos_token}, tokenizer.bos_token_id: {tokenizer.bos_token_id}")
-    logger.info(f"tokenizer.eos_token: {tokenizer.eos_token}, tokenizer.eos_token_id: {tokenizer.eos_token_id}")
-    logger.info(f"tokenizer.pad_token: {tokenizer.pad_token}, tokenizer.pad_token_id: {tokenizer.pad_token_id}")
-    logger.info(f"Tokenizer Length: {len(tokenizer)}")
-    logger.info(f"Padding side: {tokenizer.padding_side}")
+    logger.info(f"Padding side: {tokenizer.padding_side}\n\nTokenizer Length: {len(tokenizer)}\n\ntokenizer.bos_token: {tokenizer.bos_token}, tokenizer.bos_token_id: {tokenizer.bos_token_id}\n\ntokenizer.eos_token: {tokenizer.eos_token}, tokenizer.eos_token_id: {tokenizer.eos_token_id}\n\ntokenizer.pad_token: {tokenizer.pad_token}, tokenizer.pad_token_id: {tokenizer.pad_token_id}")
 
 
+    '''增加特殊token, 即UIE中提到的spot, asoc等'''
     if training_args.do_train:
         to_add_special_token = list()
         for special_token in [constants.type_start, constants.type_end, constants.text_start, constants.span_start, constants.spot_prompt, constants.asoc_prompt]:
             if special_token not in tokenizer.get_vocab():
                 to_add_special_token += [special_token]
-        tokenizer.add_special_tokens(
-            {"additional_special_tokens": tokenizer.special_tokens_map_extended['additional_special_tokens'] + to_add_special_token}
-        )
+        tokenizer.add_special_tokens({"additional_special_tokens": tokenizer.special_tokens_map_extended['additional_special_tokens'] + to_add_special_token})
 
 
-    if 'prompt' in model_args.model_name_or_path:
-        model = T5Prompt(tokenizer, f'{cwd}/hf_models/mix', prompt_args)
-        model.load_state_dict(torch.load(os.path.join(model_args.model_name_or_path, 'pytorch_model.bin')))
-    else:
-        model = T5Prompt(           # define models
-            tokenizer,
-            model_args.model_name_or_path,
-            prompt_args,
-        )
+    '''加载模型'''
+    model = T5Prompt(           
+        tokenizer,
+        model_args.model_name_or_path,
+        prompt_args,
+    )
     logger.info(f"Tokenizer Length: {len(tokenizer)}")   
-
     ema = None
     if training_args.use_ema:
         ema = EMA(model, 0.99, training_args.device)
         ema.register()
 
-
+    '''
+    只需要关注record_schema即可, 一般来说第一行是spot(实体、事件类型), 第二行是asoc(关系、论元角色)、第三行是spot与asco映射(一般只有事件抽取用到)
+    ACE2005_Event
+    ["attack", "start position", "transfer ownership", "be born", "sentence", "die", "arrest jail", "transport", "elect", "phone write", "end organization", "sue", "acquit", "marry", "extradite"]
+    ["destination", "victim", "seller", "plaintiff", "beneficiary", "organization", "agent", "person", "attacker", "origin", "buyer", "vehicle", "target", "entity", "instrument", "adjudicator", "artifact", "place", "defendant"]
+    {"attack": ["target", "instrument", "place", "victim", "agent", "attacker"], "start position": ["person", "entity", "place"], "transfer ownership": ["artifact", "place", "seller", "beneficiary", "buyer"], "be born": ["person", "place"], "sentence": ["place", "adjudicator", "defendant"], "die": ["instrument", "place", "victim", "agent", "person"], "arrest jail": ["person", "agent", "place"], "transport": ["destination", "artifact", "place", "victim", "agent", "origin", "vehicle"], "elect": ["person", "entity", "place"], "phone write": ["entity", "place"], "end organization": ["organization", "place"], "sue": ["plaintiff", "adjudicator", "place", "defendant"], "acquit": ["adjudicator", "defendant"], "marry": ["person", "place"], "extradite": ["person", "origin", "agent", "destination"]}
+    NYT
+    ["location", "organization", "person"]
+    ["place of death", "industry", "profession", "contains", "place founded", "people", "advisors", "major shareholder of", "children", "teams"]
+    {"location": ["place of death", "contains", "place founded", "people", "major shareholder of", "teams"], "organization": ["place of death", "industry", "contains", "place founded", "people", "advisors", "children", "teams"], "person": ["place of death", "profession", "contains", "place founded", "people", "major shareholder of", "children"]}
+    Few-NERD
+    ["person other", "writtenart", "director", "protest", "geographical social political", "weapon", "scholar", "event other", "language", "film", "law", "road", "soldier", "education", "library", "astronomything", "hotel", "game", "award", "theater", "disease", "election", "currency", "ship", "livingthing", "art other", "disaster", "medical", "park", "train"]
+    []
+    {"person other": [], "writtenart": [], "director": [], "protest": [], "geographical social political": [], "weapon": [], "scholar": [], "event other": [], "language": [], "film": [], "law": [], "road": [], "soldier": [], "education": [], "library": [], "astronomything": [], "hotel": [], "game": [], "award": [], "theater": [], "disease": [], "election": [], "currency": [], "ship": [], "livingthing": [], "art other": [], "disaster": [], "medical": [], "park": [], "train": []}
+    '''
     if data_args.record_schema and os.path.exists(data_args.record_schema):
         record_schema = RecordSchema.read_from_file(data_args.record_schema)
     else:
         record_schema = None
 
 
+    '''初始化prompt的值'''
     if prompt_args.init_prompt:
         logger.info(f"init_prompt? {prompt_args.init_prompt}")
-
+        '''spot_prompt、asoc_prompt是prompt中的分隔符'''
         spot_prompt_id = tokenizer.encode(constants.spot_prompt, add_special_tokens = False)
         asoc_prompt_id = tokenizer.encode(constants.asoc_prompt, add_special_tokens = False)
 
-        negative_file = '/'.join(data_args.train_file.split('/')[:-1]) + '/negative.pt'
+        negative_file = os.path.join('/'.join(data_args.train_file.split('/')[:-1]), 'negative.pt')
         if os.path.exists(negative_file):
             logger.info(f"Load from {negative_file}")
             ng = torch.load(negative_file)
@@ -246,11 +310,13 @@ def main():
         else:
             spot_ids = []
             asoc_ids = []
+            '''选用最后一个迭代的所有spot、asoc的ids, 用于prompt的初始值(仍然有剩余空间, 即neg_len)'''
             record_schema2 = RecordSchema.read_from_file(prompt_args.record2)
             for spot in record_schema2.type_list:
                 spot_ids.append(tokenizer.encode(spot, add_special_tokens = False))     
             for asoc in record_schema2.role_list:
                 asoc_ids.append(tokenizer.encode(asoc, add_special_tokens = False))
+            '''get_negative_samples(选用spot、asoc的近义词)获得剩余空间的prompt'''
             neg_len = prompt_args.prompt_len - len(record_schema2.type_list) - len(record_schema2.role_list) - 5
             if data_args.task_name == 'relation':
                 negative_sample = get_negative_samples(record_schema2.role_list, neg_len)
@@ -259,20 +325,29 @@ def main():
             negative_sample_ids = []
             for it in negative_sample:
                 negative_sample_ids.append(tokenizer.encode(it, add_special_tokens = False))
-            ng = {"negative_sample": negative_sample, "negative_sample_ids": negative_sample_ids, "spot_ids": spot_ids, "asoc_ids": asoc_ids}
+            ng = {
+                "negative_sample": negative_sample, 
+                "negative_sample_ids": negative_sample_ids, 
+                "spot_ids": spot_ids, 
+                "asoc_ids": asoc_ids
+            }
             torch.save(ng, negative_file)
             logger.info(f"Save to {negative_file}")
 
-        logger.info(f"spot_ids: {spot_ids}")
-        logger.info(f"asoc_ids: {asoc_ids}")
-        logger.info(f"data_args.task_name: {data_args.task_name}")
-        logger.info(f"negative_sample: {negative_sample}")
-        logger.info(f"negative_sample_ids: {negative_sample_ids}")
-
+        logger.info(f"spot_ids: {spot_ids}\n\nasoc_ids: {asoc_ids}\n\ndata_args.task_name: {data_args.task_name}\n\nnegative_sample: {negative_sample}\n\nnegative_sample_ids: {negative_sample_ids}")
+        '''
+        spot_ids: [[414, 1102], [3211], [456, 1102], [5252, 8660], [1567, 16, 12194], [2025, 540], [2025, 7915], [1576, 17782], [36, 2170], [7142], [67], [5970], [10319, 11796], [1855], [11924], [456, 1470], [942], [16, 10609, 15], [951, 1431], [7986, 1470], [15884, 14160], [3689, 3507], [1399], [22664, 75, 17], [414, 1470], [2629, 15], [7759], [3, 9, 75, 10073], [3958], [20111], [12133], [996, 10700], [260, 2029]]
+        asoc_ids: [[16877], [27483], [3954], [3102], [10409], [768, 23, 8717], [428, 52], [1470], [2387], [286], [9123], [8001], [7584], [19181, 76, 4370, 1016], [568], [1689], [23489, 127], [11095], [11819], [5009], [22600], [5233]]
+        data_args.task_name: event
+        negative_sample: ['lawsuits', 'charges', '.', 'daughters', 'dying', 'could', 'been', 'responsible', 'husband', 'designate', 'remarry', 'proclaimed', 'going', 'art', 'embarrass', 'next', 'last', 'began', 'being', 'if']
+        negative_sample_ids: [[9953, 7], [3991], [3, 5], [16649], [13677], [228], [118], [1966], [2553], [408, 342], [3, 60, 1635, 651], [3, 28901], [352], [768], [10960, 10116, 7, 7], [416], [336], [1553], [271], [3, 99]]
+        '''
+        
+        '''初始化prompt值'''
         model.init_prompt(spot_ids, asoc_ids, negative_sample_ids, spot_prompt_id, asoc_prompt_id, [tokenizer.pad_token_id])
 
 
-
+    '''默认prefix是空, 可以添加数据集来源'''
     if data_args.source_prefix is not None:
         if data_args.source_prefix == 'schema':
             prefix = PrefixGenerator.get_schema_prefix(schema=record_schema)
@@ -282,8 +357,7 @@ def main():
             prefix = data_args.source_prefix
     else:
         prefix = ""
-    logger.info(f"Prefix: {prefix}")
-    logger.info(f"Prefix Length: {len(tokenizer.tokenize(prefix))}")
+    logger.info(f"Prefix: {prefix}\n\nPrefix Length: {len(tokenizer.tokenize(prefix))}")
 
 
     if training_args.do_train:
@@ -300,7 +374,6 @@ def main():
     text_column = data_args.text_column
     record_column = data_args.record_column
     logger.info('Using src: %s and tgt: %s' % (text_column, record_column)) # Using src: text and tgt: record
-
     # Temporarily set max_target_length for training.
     max_target_length = data_args.max_target_length
     padding = "max_length" if data_args.pad_to_max_length else False
@@ -339,11 +412,13 @@ def main():
             model_inputs['sample_prompt'] = [True] * len(model_inputs['input_ids'])
         return model_inputs
 
+
     def preprocess_function_eval(examples):
         model_inputs = preprocess_function(examples)
         # sample_prompt=False for evaluation
         model_inputs['sample_prompt'] = [False] * len(model_inputs['input_ids'])
         return model_inputs
+    
 
     def postprocess_text(x_str):
         # Clean `bos` `eos` `pad` for cleaned text
@@ -351,8 +426,8 @@ def main():
             x_str = x_str.replace(to_remove_token, '')
         return x_str.strip()
 
-    logger.info("Start Data Preprocessing ...")
 
+    logger.info("Start Data Preprocessing ...")
     if training_args.do_train:
         train_dataset = datasets["train"]
         if data_args.max_train_samples is not None:
@@ -401,7 +476,6 @@ def main():
     if data_args.pad_to_max_length:     # If False, will pad the samples dynamically when batching to the maximum length in the batch
         data_collator = default_data_collator
     elif data_args.source_prefix.startswith('meta'):
-
         if data_args.spot_noise > 0 or data_args.asoc_noise > 0:
             if data_args.decoding_format == 'spotasoc':
                 spot_asoc_nosier = SpotAsocNoiser(
@@ -409,6 +483,21 @@ def main():
                     asoc_noise_ratio=data_args.asoc_noise,
                     null_span=constants.null_span,
                 )
+                '''
+                这是负采样器, 可以看到原始数据中的spot、asoc只包含标注(entity、relation、event)中存在的schema, 这些称为正样本
+                其他存在于record.schema中但不存在标注中的称为负样本
+                负采样会从负样本中采样一部分标注中不存在的schema加入到spot、asoc
+
+                "spot": ["geographical social political"], 
+                "spot_asoc": [
+                    {"span": "Multan", "label": "geographical social political", "asoc": []}, 
+                    {"span": "Pakistan", "label": "geographical social political", "asoc": []}
+                ]
+                ["person other", "writtenart", "director", "protest", "geographical social political", "weapon", "scholar", "event other", "language", "film", "law", "road", "soldier", "education", "library", "astronomything", "hotel", "game", "award", "theater", "disease", "election", "currency", "ship", "livingthing", "art other", "disaster", "medical", "park", "train"]
+                上面只有"geographical social political"一个schema是正样本, 其他都是负样本,
+                采样两个负样本"person other", "writtenart"
+                最终得到"spot": ["geographical social political", "person other", "writtenart"], 
+                '''
             else:
                 raise NotImplementedError(
                     f"decoding_format {data_args.decoding_format} is not implemented."
@@ -416,7 +505,9 @@ def main():
         else:
             spot_asoc_nosier = None
 
-
+        '''
+        spot_negative、asoc_negative分别是spot、asoc负采样的数量, -1表示负样本都添加, 由negative_ratio参数控制比例
+        '''
         if data_args.task_name == 'relation':
             spot_negative = data_args.meta_negative
             asoc_negative = int(len(record_schema.role_list) * data_args.negative_ratio)
@@ -430,8 +521,17 @@ def main():
         logger.info(f"task name: {data_args.task_name}")   
         logger.info(f"spot_negative: {spot_negative}")
         logger.info(f"asoc_negative: {asoc_negative}")
+        '''
+        len(record_schema.type_list): 15
+        len(record_schema.role_list): 19
+        data_args.negative_ratio: 0.8
+        data_args.meta_negative: -1
+        task name: event
+        spot_negative: 12
+        asoc_negative: -1
+        '''
 
-
+        '''具体负采样会用到的数据处理器'''
         data_collator = PromptForMetaSeq2Seq(
             tokenizer,
             model=model,
@@ -457,6 +557,7 @@ def main():
         )
 
 
+    '''在验证集上评估模型输出的F1指标, 通过F1选择更好的模型'''
     def compute_metrics(eval_preds):
         preds, labels = eval_preds
         if isinstance(preds, tuple):
@@ -492,8 +593,6 @@ def main():
     s_sparsemax = "ConstraintSeq2SeqPromptTrainer"
     if training_args.use_sparsemax:
         s_sparsemax = "ConstraintSeq2SeqPromptSparseTrainer"
-    #early_stop = EarlyStoppingCallback(early_stopping_patience = 5)
-    #logger.info(f"EarlyStoppingCallback: {early_stop}")
     trainer = train_dict[s_sparsemax](
         model=model,
         args=training_args,
@@ -506,7 +605,6 @@ def main():
         decoding_type_schema=record_schema,
         decoding_format=data_args.decoding_format,
         source_prefix=prefix,
-        #callbacks=[early_stop, ],
         task=data_args.task_name,
     )
     

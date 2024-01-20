@@ -128,59 +128,6 @@ class HuggingfacePromptPredictor:
 
 
 
-
-class HuggingfacePrefixPredictor:
-    def __init__(self, decoding_format = 'spotasoc', source_prefix = '', args = None) -> None:
-        self._tokenizer = T5TokenizerFast.from_pretrained(args.model)
-        logger.info(f"Tokenizer Length: {len(self._tokenizer)}")
-        self._device = f"cuda:{args.cuda}" if torch.cuda.is_available() else "cpu"
-        logger.info(f"Device: {self._device}")
-        self._model = T5Prefix(self._tokenizer, args.tg_path, args).to(self._device)
-        self._model.load_state_dict(torch.load(os.path.join(args.model, 'pytorch_model.bin'), map_location=self._device))
-        '''是这样的, 先初始化__init__(slef/encoder/decoder prompt先随机初始化吧), 再load_state_dict取参数(prompt也取)'''
-        self._model.eval()
-
-        self._schema = RecordSchema.read_from_file(os.path.join(args.data_folder, "record.schema"))       
-        self._ssi = schema_to_ssi(self._schema)
-        logger.info(f"ssi: {self._ssi}")
-        self._max_source_length = args.max_source_length
-        self._max_target_length = args.max_target_length
-        self._args = {"num_beams": args.num_beams, "do_sample": args.do_sample, "top_k": args.top_k, "top_p": args.top_p}
-
-        
-        if args.CD:
-            self.constraint_decoder = get_constraint_decoder(tokenizer = self._tokenizer,
-                                                             type_schema = self._schema,
-                                                             decoding_schema = decoding_format,
-                                                             source_prefix = source_prefix,
-                                                             task_name = args.task)
-        else:
-            self.constraint_decoder = None
-            
-
-    def predict(self, text):
-        func = None
-        def CD_fn(batch_id, sent):
-            src_sentence = inputs['input_ids'][batch_id]
-            return self.constraint_decoder.constraint_decoding(src_sentence = src_sentence, tgt_generated = sent)
-        if self.constraint_decoder is not None:
-            func = CD_fn
-            
-        text = [self._ssi + x for x in text]  
-        inputs = self._tokenizer(text, padding=True, return_tensors='pt').to(self._device)
-        inputs['input_ids'] = inputs['input_ids'][:, :self._max_source_length]
-        inputs['attention_mask'] = inputs['attention_mask'][:, :self._max_source_length] 
-
-        result = self._model.generate(
-            input_ids=inputs['input_ids'],
-            attention_mask=inputs['attention_mask'],
-            prefix_allowed_tokens_fn=func,
-            **self._args
-        )
-        return self._tokenizer.batch_decode(result, skip_special_tokens=False, clean_up_tokenization_spaces=False)
-
-
-
 class HuggingfacePredictor:
     def __init__(self, decoding_format = 'spotasoc', source_prefix = '', args = None) -> None:
         self._tokenizer = T5TokenizerFast.from_pretrained(args.model)
@@ -295,7 +242,6 @@ def main():
     parser.add_argument('--match_mode', default='normal', choices=['set', 'normal', 'multimatch'])
     
     parser.add_argument('--use_prompt', action='store_true')
-    parser.add_argument('--use_prefix', action='store_true')
     parser.add_argument('--use_ssi', action='store_true')
     parser.add_argument('--prompt_len', default=10, type=int)
     parser.add_argument('--prompt_dim', default=512, type=int)
@@ -353,9 +299,6 @@ def main():
 
     if options.use_prompt:
         predictor = HuggingfacePromptPredictor(args=options) 
-    elif options.use_prefix:
-        options.use_prompt = True
-        predictor = HuggingfacePrefixPredictor(args=options) 
     else:
         predictor = HuggingfacePredictor(args=options) 
 
