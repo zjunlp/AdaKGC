@@ -80,7 +80,7 @@ data_name=Few-NERD
 task=entity
 device=0
 ratio=0.8
-bash scripts/run_prompt.bash --model=hf_models/mix --data=data/${data_name}_${mode}/iter_1 --output=output/${data_name}_${mode}_${ratio} --config=config/prompt_conf/Few-NERD.ini --device=${device} --negative_ratio=${ratio} --record2=data/${data_name}_${mode}/iter_7/record.schema
+bash scripts/fine_prompt.bash --model=hf_models/mix --data=data/${data_name}_${mode}/iter_1 --output=output/${data_name}_${mode}_${ratio} --config=config/prompt_conf/Few-NERD.ini --device=${device} --negative_ratio=${ratio} --record2=data/${data_name}_${mode}/iter_7/record.schema  --use_prompt=True --init_prompt=True
 
 ```
 
@@ -113,7 +113,7 @@ data_name=NYT
 task=relation
 device=0
 ratio=0.8
-bash scripts/run_prompt.bash --model=hf_models/mix --data=data/${data_name}_${mode}/iter_1 --output=output/${data_name}_${mode}_${ratio} --config=config/prompt_conf/NYT.ini --device=${device} --negative_ratio=${ratio} --record2=data/${data_name}_${mode}/iter_7/record.schema
+bash scripts/fine_prompt.bash --model=hf_models/mix --data=data/${data_name}_${mode}/iter_1 --output=output/${data_name}_${mode}_${ratio} --config=config/prompt_conf/NYT.ini --device=${device} --negative_ratio=${ratio} --record2=data/${data_name}_${mode}/iter_7/record.schema  --use_prompt=True --init_prompt=True
 ```
 
 + ### 事件抽取任务
@@ -126,7 +126,7 @@ data_name=ace05_event
 task=event
 device=0
 ratio=0.8
-bash scripts/run_prompt.bash --model=hf_models/mix --data=data/${data_name}_${mode}/iter_1 --output=output/${data_name}_${mode}_${ratio} --config=config/prompt_conf/ace05_event.ini --device=${device} --negative_ratio=${ratio} --record2=data/${data_name}_${mode}/iter_7/record.schema
+bash scripts/fine_prompt.bash --model=hf_models/mix --data=data/${data_name}_${mode}/iter_1 --output=output/${data_name}_${mode}_${ratio} --config=config/prompt_conf/ace05_event.ini --device=${device} --negative_ratio=${ratio} --record2=data/${data_name}_${mode}/iter_7/record.schema  --use_prompt=True --init_prompt=True
 ```
 
 ## 🎰 推理
@@ -182,7 +182,7 @@ data_name=ace05_event
 task=event
 device=0
 ratio=0.8
-bash scripts/run_prompt.bash --model=hf_models/mix --data=data/${data_name}_${mode}/iter_1 --output=output/${data_name}_${mode}_${ratio} --config=config/prompt_conf/ace05_event.ini --device=${device} --negative_ratio=${ratio} --record2=data/${data_name}_${mode}/iter_7/record.schema
+bash scripts/run_prompt.bash --model=hf_models/mix --data=data/${data_name}_${mode}/iter_1 --output=output/${data_name}_${mode}_${ratio} --config=config/prompt_conf/ace05_event.ini --device=${device} --negative_ratio=${ratio} --record2=data/${data_name}_${mode}/iter_7/record.schema --use_prompt=True --init_prompt=True
 python3 inference_mul.py --dataname=data/${data_name}/${data_name}_${mode} --t5_path=hf_models/mix --model=output/${data_name}_${mode}_${ratio} --task=${task} --cuda=${device} --mode=${mode} --use_prompt --use_ssi --prompt_len=80 --prompt_dim=512
 ```
 

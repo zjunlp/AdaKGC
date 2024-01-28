@@ -18,7 +18,7 @@ from uie.sel2record.record import MapConfig
 from uie.extraction.scorer import *
 from uie.sel2record.sel2record import SEL2Record
 from uie.seq2seq.constraint_decoder import get_constraint_decoder
-from uie.seq2seq.models import T5Prompt, T5Prefix
+from uie.seq2seq.models import T5Prompt
 from uie.extraction.constants import type_start, type_end, span_start, null_span
 
 logger = logging.getLogger(__name__)

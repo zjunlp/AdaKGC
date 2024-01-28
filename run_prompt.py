@@ -294,6 +294,7 @@ def main():
         record_schema = None
 
 
+    negative_sample = []
     '''初始化prompt的值'''
     if prompt_args.init_prompt:
         logger.info(f"init_prompt? {prompt_args.init_prompt}")

@@ -25,7 +25,7 @@ class DynamicSSIGenerator():
     """
     Sample negative spot and asoc to construct SSI, meta schema需要添加一些negative spot和asoc
     """
-    def __init__(self, tokenizer: PreTrainedTokenizerBase, schema: RecordSchema, positive_rate=1, spot_negative=5, asoc_negative=5, ordered_prompt=False, task_name=None) -> None:
+    def __init__(self, tokenizer: PreTrainedTokenizerBase, schema: RecordSchema, negative_list=[], positive_rate=1, spot_negative=5, asoc_negative=5, other_ratio=0.3, ordered_prompt=False, task_name=None) -> None:
         self.spot_dict = self.get_ordered_dict(schema.type_list, tokenizer)    # {'aspect':[2663], ...}
         self.asoc_dict = self.get_ordered_dict(schema.role_list, tokenizer)    # {'positive':[1465], ...}
         self.spot_list = list(self.spot_dict.keys())
@@ -176,6 +176,7 @@ class DataCollatorForMetaSeq2Seq:
     spot_asoc_nosier: SpotAsocNoiser = None
     decoding_format: str = 'spotasoc'
     add_null: bool = False
+    use_ssi: bool = True
     count : int = 10
 
     def __call__(self, features):
@@ -304,7 +305,7 @@ class DataCollatorForMetaSeq2Seq:
 
 
 class PromptSSIGenerator():
-    def __init__(self, tokenizer, schema: RecordSchema, negative_list=[], positive_rate=1, spot_negative=5, asoc_negative=5, ordered_prompt=False, other_ratio = 0.3, task_name='') -> None:
+    def __init__(self, tokenizer, schema: RecordSchema, negative_list=[], positive_rate=1, spot_negative=5, asoc_negative=5, ordered_prompt=False, other_ratio=0.3, task_name='') -> None:
         self.spot_dict = self.get_ordered_dict(schema.type_list, tokenizer)    # {'aspect':[2663], ...}
         self.asoc_dict = self.get_ordered_dict(schema.role_list, tokenizer)    # {'positive':[1465], ...}
         self.spot_list = list(self.spot_dict.keys())
