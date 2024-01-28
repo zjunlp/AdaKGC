@@ -33,6 +33,8 @@ from uie.seq2seq.constrained_seq2seq_prompt import (
 from uie.seq2seq.data_collator import (
     PromptForMetaSeq2Seq,
     PromptSSIGenerator,
+    DynamicSSIGenerator,
+    DataCollatorForMetaSeq2Seq
 )
 from uie.seq2seq.features import RecordFeature
 from uie.seq2seq.t5_bert_tokenizer import T5BertTokenizer
@@ -531,8 +533,10 @@ def main():
         asoc_negative: -1
         '''
 
+        data_collator_class = PromptForMetaSeq2Seq if prompt_args.use_prompt else DataCollatorForMetaSeq2Seq
+        negative_sampler_class = PromptSSIGenerator if prompt_args.use_prompt else DynamicSSIGenerator
         '''具体负采样会用到的数据处理器'''
-        data_collator = PromptForMetaSeq2Seq(
+        data_collator = data_collator_class(
             tokenizer,
             model=model,
             label_pad_token_id=label_pad_token_id,
@@ -540,7 +544,7 @@ def main():
             max_length=data_args.max_source_length,
             max_prefix_length=data_args.max_prefix_length,
             max_target_length=data_args.max_target_length,
-            negative_sampler=PromptSSIGenerator(
+            negative_sampler=negative_sampler_class(
                 tokenizer=tokenizer,
                 schema=record_schema,
                 negative_list=negative_sample,      # 上面的负样本
